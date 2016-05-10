@@ -24,11 +24,6 @@
     <packaging>jar</packaging>
     <name>DCS Packaging Rules</name>
 
-    <!--<parent>-->
-    <!--<groupId>org.dataconservancy.pkgtool</groupId>-->
-    <!--<artifactId>dcs-packaging-tool</artifactId>-->
-    <!--<version>0.10.1-SNAPSHOT</version>-->
-    <!--</parent>-->
 
     <properties>
         <!-- Version of DROID content detection in use -->
@@ -84,57 +79,12 @@
             </plugins>
     </build>
 
-    <!--<build>-->
-    <!--<plugins>-->
-    <!--<plugin>-->
-    <!--<groupId>org.apache.maven.plugins</groupId>-->
-    <!--<artifactId>maven-surefire-plugin</artifactId>-->
-    <!--<configuration>-->
-    <!--<systemPropertyVariables>-->
-    <!--<dcs.package.tool.package.dir>${project.build.testOutputDirectory}/generated-packages</dcs.package.tool.package.dir>-->
-    <!--<dcs.package.tool.staging.dir>${project.build.testOutputDirectory}/package-staging</dcs.package.tool.staging.dir>-->
-    <!--<dcs.package.tool.test.content>${project.basedir}/src/test/resources</dcs.package.tool.test.content>-->
-    <!--</systemPropertyVariables>-->
-    <!--</configuration>-->
-    <!--</plugin>-->
-
-    <!--<plugin>-->
-    <!--<groupId>org.jacoco</groupId>-->
-    <!--<artifactId>jacoco-maven-plugin</artifactId>-->
-    <!--</plugin>-->
-    <!--</plugins>-->
-    <!--</build>-->
 
     <!-- Dependencies =============================================== -->
 
     <!-- Compiles -->
     <dependencies>
 
-        <!--<dependency>-->
-        <!--<groupId>org.dataconservancy.pkgtool</groupId>-->
-        <!--<artifactId>dcs-packaging-tool-api</artifactId>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>org.dataconservancy.pkgtool</groupId>-->
-        <!--<artifactId>dcs-packaging-tool-model</artifactId>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>org.dataconservancy.pkgtool</groupId>-->
-        <!--<artifactId>dcs-packaging-tool-model-builder-xstream</artifactId>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>com.googlecode.foresite-toolkit</groupId>-->
-        <!--<artifactId>foresite</artifactId>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>org.springframework</groupId>-->
-            <!--<artifactId>spring-beans</artifactId>-->
-            <!--<scope>provided</scope>-->
-        <!--</dependency>-->
 
         <dependency>
             <groupId>commons-io</groupId>
@@ -148,12 +98,6 @@
             <version>1.7.21</version>
         </dependency>
 
-
-        <!--<dependency>-->
-            <!--<groupId>joda-time</groupId>-->
-            <!--<artifactId>joda-time</artifactId>-->
-            <!--<scope>compile</scope>-->
-        <!--</dependency>-->
 
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -362,12 +306,6 @@
         </dependency>
 
 
-        <!--<dependency>-->
-            <!--<groupId>org.dataconservancy.shared</groupId>-->
-            <!--<artifactId>dcs-shared-util</artifactId>-->
-        <!--</dependency>-->
-
-
         <!-- Test -->
 
         <dependency>
@@ -376,18 +314,6 @@
             <version>3.2.3.RELEASE</version>
         </dependency>
 
-
-        <!--<dependency>-->
-            <!--<groupId>org.springframework</groupId>-->
-            <!--<artifactId>spring-core</artifactId>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>org.springframework</groupId>-->
-            <!--<artifactId>spring-context</artifactId>-->
-            <!--&lt;!&ndash;  <version>${spring.version}</version> &ndash;&gt;-->
-        <!--</dependency>-->
 
         <dependency>
             <groupId>junit</groupId>
@@ -422,11 +348,6 @@
             <version>1.3.2</version>
         </dependency>
 
-
-        <!--<dependency>-->
-            <!--<groupId>com.googlecode.libphonenumber</groupId>-->
-            <!--<artifactId>libphonenumber</artifactId>-->
-        <!--</dependency>-->
 
     </dependencies>
 

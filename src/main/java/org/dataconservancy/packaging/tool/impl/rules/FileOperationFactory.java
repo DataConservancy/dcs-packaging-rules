@@ -23,8 +23,8 @@ import org.dataconservancy.packaging.tool.impl.rules.operations.File_Children;
 import org.dataconservancy.packaging.tool.impl.rules.operations.File_Descendents;
 import org.dataconservancy.packaging.tool.impl.rules.operations.File_Parent;
 import org.dataconservancy.packaging.tool.impl.rules.operations.File_Self;
-import org.dataconservancy.packaging.tool.model.description.FileRel;
-import org.dataconservancy.packaging.tool.model.description.FileSpec;
+import org.dataconservancy.packaging.tool.model.rules.FileRel;
+import org.dataconservancy.packaging.tool.model.rules.FileSpec;
 
 /** Produces properly configured {@link FileOperation} impls according to the given specification.*/
 public class FileOperationFactory {

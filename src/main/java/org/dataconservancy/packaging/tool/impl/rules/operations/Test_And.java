@@ -18,7 +18,7 @@ package org.dataconservancy.packaging.tool.impl.rules.operations;
 
 import org.dataconservancy.packaging.tool.impl.rules.FileContext;
 import org.dataconservancy.packaging.tool.impl.rules.TestOperation;
-import org.dataconservancy.packaging.tool.model.description.TestSpec;
+import org.dataconservancy.packaging.tool.model.rules.TestSpec;
 
 /**
  * Implements the "And" test operation.

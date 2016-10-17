@@ -23,7 +23,7 @@ import java.util.Arrays;
 import org.dataconservancy.packaging.tool.impl.rules.FileContext;
 import org.dataconservancy.packaging.tool.impl.rules.FileContextImpl;
 import org.dataconservancy.packaging.tool.impl.rules.ValueOperation;
-import org.dataconservancy.packaging.tool.model.description.TestSpec;
+import org.dataconservancy.packaging.tool.model.rules.TestSpec;
 
 import org.junit.Test;
 

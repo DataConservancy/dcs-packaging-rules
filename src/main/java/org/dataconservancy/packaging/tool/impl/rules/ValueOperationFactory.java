@@ -22,8 +22,8 @@ import java.util.Map;
 import org.dataconservancy.packaging.tool.impl.rules.operations.Value_FileMetadata;
 import org.dataconservancy.packaging.tool.impl.rules.operations.Value_Literal;
 import org.dataconservancy.packaging.tool.impl.rules.operations.Value_SystemProperty;
-import org.dataconservancy.packaging.tool.model.description.ValueSpec;
-import org.dataconservancy.packaging.tool.model.description.ValueType;
+import org.dataconservancy.packaging.tool.model.rules.ValueSpec;
+import org.dataconservancy.packaging.tool.model.rules.ValueType;
 
 /**
  * Produces fully configured {@link ValueOperation} based on the supplied

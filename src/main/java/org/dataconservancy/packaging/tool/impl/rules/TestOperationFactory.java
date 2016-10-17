@@ -25,7 +25,7 @@ import org.dataconservancy.packaging.tool.impl.rules.operations.Test_Count;
 import org.dataconservancy.packaging.tool.impl.rules.operations.Test_Match;
 import org.dataconservancy.packaging.tool.impl.rules.operations.Test_Not;
 import org.dataconservancy.packaging.tool.impl.rules.operations.Test_Or;
-import org.dataconservancy.packaging.tool.model.description.TestSpec;
+import org.dataconservancy.packaging.tool.model.rules.TestSpec;
 
 /** Produces fully configured {@link TestOperation} impls based on a given specification. */
 public class TestOperationFactory {

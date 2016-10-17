@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import org.dataconservancy.packaging.tool.impl.rules.FileContext;
 import org.dataconservancy.packaging.tool.impl.rules.TestOperation;
 import org.dataconservancy.packaging.tool.impl.rules.ValueOperation;
-import org.dataconservancy.packaging.tool.model.description.TestSpec;
+import org.dataconservancy.packaging.tool.model.rules.TestSpec;
 
 import static org.dataconservancy.packaging.tool.impl.rules.operations.TestUtil.getParam;
 

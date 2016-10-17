@@ -22,13 +22,13 @@ import java.net.URI;
 
 import java.util.*;
 
-import org.dataconservancy.packaging.tool.model.description.Action;
-import org.dataconservancy.packaging.tool.model.description.ArtifactTypeSpec;
-import org.dataconservancy.packaging.tool.model.description.MappingSpec;
-import org.dataconservancy.packaging.tool.model.description.MappingsSpec;
-import org.dataconservancy.packaging.tool.model.description.PropertySpec;
-import org.dataconservancy.packaging.tool.model.description.RelationshipSpec;
-import org.dataconservancy.packaging.tool.model.description.RuleSpec;
+import org.dataconservancy.packaging.tool.model.rules.Action;
+import org.dataconservancy.packaging.tool.model.rules.ArtifactTypeSpec;
+import org.dataconservancy.packaging.tool.model.rules.MappingSpec;
+import org.dataconservancy.packaging.tool.model.rules.MappingsSpec;
+import org.dataconservancy.packaging.tool.model.rules.PropertySpec;
+import org.dataconservancy.packaging.tool.model.rules.RelationshipSpec;
+import org.dataconservancy.packaging.tool.model.rules.RuleSpec;
 
 /** Simple implementation of a Rule as constructed from a specification */
 public class RuleImpl

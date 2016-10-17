@@ -17,8 +17,8 @@
 package org.dataconservancy.packaging.tool.model.builder.xstream;
 
 import org.dataconservancy.packaging.tool.model.PackageDescriptionRulesBuilder;
-import org.dataconservancy.packaging.tool.model.description.ObjectFactory;
-import org.dataconservancy.packaging.tool.model.description.RulesSpec;
+import org.dataconservancy.packaging.tool.model.rules.ObjectFactory;
+import org.dataconservancy.packaging.tool.model.rules.RulesSpec;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;

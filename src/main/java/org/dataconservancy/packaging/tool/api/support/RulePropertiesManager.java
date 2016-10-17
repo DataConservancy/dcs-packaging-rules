@@ -16,7 +16,7 @@
 
 package org.dataconservancy.packaging.tool.api.support;
 
-import org.dataconservancy.packaging.tool.model.description.RulesSpec;
+import org.dataconservancy.packaging.tool.model.rules.RulesSpec;
 
 import java.util.Map;
 

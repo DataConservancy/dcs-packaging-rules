@@ -20,8 +20,8 @@ import java.lang.reflect.Method;
 
 import org.dataconservancy.packaging.tool.impl.rules.FileContext;
 import org.dataconservancy.packaging.tool.impl.rules.ValueOperationFactory;
-import org.dataconservancy.packaging.tool.model.description.TestParam;
-import org.dataconservancy.packaging.tool.model.description.TestSpec;
+import org.dataconservancy.packaging.tool.model.rules.TestParam;
+import org.dataconservancy.packaging.tool.model.rules.TestSpec;
 
 public abstract class TestUtil {
 

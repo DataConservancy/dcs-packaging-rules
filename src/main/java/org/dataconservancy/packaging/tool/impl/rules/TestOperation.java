@@ -16,7 +16,7 @@
 
 package org.dataconservancy.packaging.tool.impl.rules;
 
-import org.dataconservancy.packaging.tool.model.description.TestSpec;
+import org.dataconservancy.packaging.tool.model.rules.TestSpec;
 
 /**
  * Returns true or false after applying some test operation to the results

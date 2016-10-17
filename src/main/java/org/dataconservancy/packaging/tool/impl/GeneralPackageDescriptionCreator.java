@@ -44,9 +44,9 @@ import org.dataconservancy.packaging.tool.impl.rules.RuleImpl;
 import org.dataconservancy.packaging.tool.model.PackageArtifact;
 import org.dataconservancy.packaging.tool.model.PackageDescription;
 import org.dataconservancy.packaging.tool.model.PackageRelationship;
-import org.dataconservancy.packaging.tool.model.description.Action;
-import org.dataconservancy.packaging.tool.model.description.RuleSpec;
-import org.dataconservancy.packaging.tool.model.description.RulesSpec;
+import org.dataconservancy.packaging.tool.model.rules.Action;
+import org.dataconservancy.packaging.tool.model.rules.RuleSpec;
+import org.dataconservancy.packaging.tool.model.rules.RulesSpec;
 
 public class GeneralPackageDescriptionCreator
         implements PackageDescriptionCreator {

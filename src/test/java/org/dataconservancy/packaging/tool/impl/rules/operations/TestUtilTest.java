@@ -20,11 +20,11 @@ import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
 
-import org.dataconservancy.packaging.tool.model.description.TestParam;
-import org.dataconservancy.packaging.tool.model.description.TestParams;
-import org.dataconservancy.packaging.tool.model.description.TestSpec;
-import org.dataconservancy.packaging.tool.model.description.ValueSpec;
-import org.dataconservancy.packaging.tool.model.description.ValueType;
+import org.dataconservancy.packaging.tool.model.rules.TestParam;
+import org.dataconservancy.packaging.tool.model.rules.TestParams;
+import org.dataconservancy.packaging.tool.model.rules.TestSpec;
+import org.dataconservancy.packaging.tool.model.rules.ValueSpec;
+import org.dataconservancy.packaging.tool.model.rules.ValueType;
 
 public class TestUtilTest {
 

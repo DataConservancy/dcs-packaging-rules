@@ -24,7 +24,7 @@ import org.dataconservancy.packaging.tool.impl.rules.FileContext;
 import org.dataconservancy.packaging.tool.impl.rules.FileContextImpl;
 import org.dataconservancy.packaging.tool.impl.rules.FileOperation;
 import org.dataconservancy.packaging.tool.impl.rules.TestOperation;
-import org.dataconservancy.packaging.tool.model.description.TestSpec;
+import org.dataconservancy.packaging.tool.model.rules.TestSpec;
 
 import org.junit.Test;
 

@@ -23,12 +23,12 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import org.dataconservancy.packaging.tool.api.support.RulePropertiesManager;
-import org.dataconservancy.packaging.tool.model.description.MappingSpec;
-import org.dataconservancy.packaging.tool.model.description.PropertySpec;
-import org.dataconservancy.packaging.tool.model.description.RelationshipSpec;
-import org.dataconservancy.packaging.tool.model.description.RuleSpec;
-import org.dataconservancy.packaging.tool.model.description.RulesSpec;
-import org.dataconservancy.packaging.tool.model.description.ValueType;
+import org.dataconservancy.packaging.tool.model.rules.MappingSpec;
+import org.dataconservancy.packaging.tool.model.rules.PropertySpec;
+import org.dataconservancy.packaging.tool.model.rules.RelationshipSpec;
+import org.dataconservancy.packaging.tool.model.rules.RuleSpec;
+import org.dataconservancy.packaging.tool.model.rules.RulesSpec;
+import org.dataconservancy.packaging.tool.model.rules.ValueType;
 
 public class SystemPropertyPreferencesRulePropertiesManager
         implements RulePropertiesManager {

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.dataconservancy.packaging.tool.model.description.ArtifactTypeSpec;
+import org.dataconservancy.packaging.tool.model.rules.ArtifactTypeSpec;
 
 public interface Mapping {
     ArtifactTypeSpec getType();

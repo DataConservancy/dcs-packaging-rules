@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.dataconservancy.packaging.tool.impl.rules.FileContext;
 import org.dataconservancy.packaging.tool.impl.rules.TestOperation;
-import org.dataconservancy.packaging.tool.model.description.TestSpec;
+import org.dataconservancy.packaging.tool.model.rules.TestSpec;
 
 
 public class Test_Not implements TestOperation<TestOperation<?>> {

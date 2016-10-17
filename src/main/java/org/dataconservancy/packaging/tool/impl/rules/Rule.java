@@ -17,7 +17,7 @@ package org.dataconservancy.packaging.tool.impl.rules;
 
 import java.util.List;
 
-import org.dataconservancy.packaging.tool.model.description.Action;
+import org.dataconservancy.packaging.tool.model.rules.Action;
 
 
 public interface Rule {

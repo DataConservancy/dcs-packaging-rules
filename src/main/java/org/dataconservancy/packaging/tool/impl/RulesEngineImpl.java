@@ -18,7 +18,12 @@ package org.dataconservancy.packaging.tool.impl;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import org.apache.http.client.utils.URIBuilder;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;
+import com.hp.hpl.jena.rdf.model.impl.StatementImpl;
+import com.hp.hpl.jena.vocabulary.RDF;
 import org.dataconservancy.packaging.tool.api.RulesEngine;
 import org.dataconservancy.packaging.tool.api.RulesEngineException;
 import org.dataconservancy.packaging.tool.impl.rules.FileContext;
@@ -26,10 +31,7 @@ import org.dataconservancy.packaging.tool.impl.rules.FileContextImpl;
 import org.dataconservancy.packaging.tool.impl.rules.Mapping;
 import org.dataconservancy.packaging.tool.impl.rules.Rule;
 import org.dataconservancy.packaging.tool.impl.rules.RuleImpl;
-import org.dataconservancy.packaging.tool.model.PackageArtifact;
-import org.dataconservancy.packaging.tool.model.PackageRelationship;
 import org.dataconservancy.packaging.tool.model.rules.Action;
-import org.dataconservancy.packaging.tool.model.rules.RuleSpec;
 import org.dataconservancy.packaging.tool.model.rules.RulesSpec;
 
 import java.io.File;
@@ -40,10 +42,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Created by jrm on 9/2/16.
@@ -51,14 +56,18 @@ import java.util.Set;
 
 public class RulesEngineImpl implements RulesEngine {
 
-    private final List<Rule> rules = new ArrayList<Rule>();
+    private final List<Rule> rules = new ArrayList<>();
 
-    private Set<String> visitedFiles = new HashSet<String>();
+    private List<Statement> statements = new ArrayList<>();
 
-    public RulesEngineImpl(RulesSpec rulesSpec) {
-            for (RuleSpec ruleSpec : rulesSpec.getRule()) {
-                rules.add(new RuleImpl(ruleSpec));
-            }
+    private Set<String> visitedFiles = new HashSet<>();
+
+    private Map<Object, URI> entityUris = new HashMap<>();
+
+    private Model model = ModelFactory.createDefaultModel();
+
+    RulesEngineImpl(RulesSpec rulesSpec) {
+        rules.addAll(rulesSpec.getRule().stream().map(RuleImpl::new).collect(Collectors.toList()));
     }
 
     @Override
@@ -79,14 +88,12 @@ public class RulesEngineImpl implements RulesEngine {
         visitedFiles.clear();
 
     /*
-     * Create resources for each filesystem entity
+     * Create resources for each filesystem entity and add Statements to the Statement list
      */
+
         visitFile(new FileContextImpl(directoryTreeRoot, directoryTreeRoot, false));
-
-
-        Model model = ModelFactory.createDefaultModel();
-
-
+        //finally, dump all the statements into the model
+        model.add(statements);
         return model;
     }
 
@@ -136,7 +143,7 @@ public class RulesEngineImpl implements RulesEngine {
             }
 
         } catch (Exception e) {
-            throw new RulesEngineException("Error applying package description generation rules to pathname "
+            throw new RulesEngineException("Error applying rules to pathname "
                     + cxt.getFile()
 
                     .toString()
@@ -153,90 +160,67 @@ public class RulesEngineImpl implements RulesEngine {
     }
 
     /*
-     * Create PackageArtifact from the file, populate PackageDescription with it
+     * Create jena Resource from the file, add Statements to the Statement List
      */
     private void populate(FileContext cxt,
                           Rule rule) {
-
         List<Mapping> mappings = rule.getMappings(cxt);
 
         for (Mapping mapping : mappings) {
 
-            /* We are using file URI as artifact IDs, unless multiple mappings */
-            URIBuilder urib = new URIBuilder(cxt.getFile().toURI());
-            //String id = cxt.getFile().toURI().toString();
-
-            /*
-             * If multiple mappings implicated by this file, then make sure
-             * they're differentiated
-             */
-            if (mappings.size() > 1) {
-                String specifier = mapping.getSpecifier();
-                if (specifier != null) {
-                    urib.setFragment(specifier);
-                }
-            }
-
-            URI uri = null;
-            try {
-                uri = urib.build();
-            } catch (URISyntaxException e) {
-
-            }
-            String id = uri.toString();
-
-            PackageArtifact artifact = new PackageArtifact();
-           // artifacts.put(id, artifact);
-            artifact.setId(id);
-            artifact.setIgnored(cxt.isIgnored());
-            //we need to relativize against the content root, not the supplied root artifact dir
             Path rootPath = Paths.get(cxt.getRoot().getParentFile().getPath());
             Path filePath = Paths.get(cxt.getFile().getPath());
-            artifact.setArtifactRef(String.valueOf(rootPath.relativize(filePath)));
-            if (uri.getFragment() != null) {
-                artifact.getArtifactRef().setFragment(uri.getFragment());
-            }
-            /*
-             * if file is a normal file, set the isByteStream flag to true on
-             * PackageArtifact
-             */
+            String relativeFilePathString = rootPath.relativize(filePath).toString();
 
-            if (cxt.getFile().isFile()) {
-                artifact.setByteStream(true);
+            if (mappings.size() > 1) {
+                relativeFilePathString = relativeFilePathString + "#" + mapping.getSpecifier();
             }
 
-            artifact.setType(mapping.getType().getValue());
+            URI uri = findURI(relativeFilePathString);
+            String subjectResourceUriString = uri.toString();
 
-            if (mapping.getType().isByteStream() != null) {
-                artifact.setByteStream(mapping.getType().isByteStream());
-            } else {
-                artifact.setByteStream(cxt.getFile().isFile());
+            Resource subjectResource = model.getResource(String.valueOf(findURI(subjectResourceUriString)));
+            if (subjectResource == null) {
+                subjectResource = model.createResource(String.valueOf(subjectResourceUriString));
             }
 
-            for (Map.Entry<String, List<String>> entry : mapping
-                    .getProperties().entrySet()) {
-                Set<String> valueSet = new HashSet<String>(entry.getValue());
-                artifact.setSimplePropertyValues(entry.getKey(), valueSet);
-            }
-            /*
-             * Since we use file URI as artifact IDs (with optional specifier as
-             * URI fragment), we just need to use the relationship's target
-             * file's URI as the relationship target, and we're done!.
-             */
-            List<PackageRelationship> rels = new ArrayList<PackageRelationship>();
+            for (Map.Entry<String, List<String>> entry : mapping.getProperties().entrySet()) {
+                Set<String> valueSet = new HashSet<>(entry.getValue());
 
-            for (Map.Entry<String, Set<URI>> rel : mapping.getRelationships()
-                    .entrySet()) {
-                Set<String> relTargets = new HashSet<String>();
-                for (URI target : rel.getValue()) {
-                    relTargets.add(target.toString());
+                //Property property = new PropertyImpl(defaultScheme, entry.getKey());
+                Property property = new PropertyImpl(entry.getKey());
+                for (String value : valueSet) {
+                        subjectResource.addProperty(property, value);
                 }
 
-                rels.add(new PackageRelationship(rel.getKey(), true, relTargets));
-
             }
-            artifact.setRelationships(rels);
+
+            for (Map.Entry<String, Set<URI>> rel : mapping
+                    .getRelationships().entrySet()) {
+                        //Property relProperty =   new PropertyImpl(defaultScheme, rel.getKey());
+                        Property relProperty =   new PropertyImpl(rel.getKey());
+                        for (URI target : rel.getValue()) {
+                            Resource objectResource = model.getResource(String.valueOf(findURI(target)));
+                            if(objectResource == null) {
+                                objectResource = model.createResource(String.valueOf(findURI(target)));
+                            }
+                            statements.add(new StatementImpl(subjectResource, relProperty, objectResource));
+                        }
+            }
+
+            model.add(subjectResource, RDF.type, mapping.getType().getValue());
         }
+    }
+
+    private URI findURI(Object key)  {
+        if(entityUris.get(key) == null){
+            try {
+                entityUris.put(key, new URI("urn:" + UUID.randomUUID().toString()));
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+        return entityUris.get(key);
     }
 
 }

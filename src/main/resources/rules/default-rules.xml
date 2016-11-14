@@ -16,7 +16,7 @@
 -->
 <rules xmlns="http://dataconservancy.org/schemas/rules/1.0/"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://dataconservancy.org/schemas/rules/1.0/ rules.xsd">
+	xsi:schemaLocation="http://dataconservancy.org/schemas/rules/1.0/rules.xsd">
 	<rule>
 		<!-- Ignore dotfiles and dot directories -->
 		<select action="exclude">

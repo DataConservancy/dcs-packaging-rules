@@ -50,7 +50,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.dataconservancy.dcs.util.FilePathUtil.prependFileUriPrefix;
 
 /**
  * Created by jrm on 9/2/16.
@@ -163,6 +162,8 @@ public class RulesEngineImpl implements RulesEngine {
 
     /*
      * Create jena Resource from the file, add Statements to the Statement List
+     * The resource may already be present in the model if it needed to be created earlier, as a target
+     * of a relationship for example.
      */
     private void populate(FileContext cxt,
                           Rule rule) {
@@ -170,34 +171,27 @@ public class RulesEngineImpl implements RulesEngine {
 
         for (Mapping mapping : mappings) {
 
-            Path rootPath = Paths.get(cxt.getRoot().getParentFile().getPath());
-            Path filePath = Paths.get(cxt.getFile().getPath());
-            String relativeFilePathString = rootPath.relativize(filePath).toString();
+            URI rootUri = cxt.getRoot().getParentFile().toURI();
+            URI fileUri = cxt.getFile().toURI();
+            URI relativeFileUri = rootUri.relativize(fileUri);
+
+            String relativeFilePathString = relativeFileUri.toString();
 
             if (mappings.size() > 1) {
                 relativeFilePathString = relativeFilePathString + "#" + mapping.getSpecifier();
             }
 
-
-            URI rootUri = null;
-            try {
-                rootUri = new URI("file:" + rootPath.toString());
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-
-            URI uri = findURI(relativeFilePathString);
+            URI uri = findOrAssignURI(relativeFilePathString);
             String subjectResourceUriString = uri.toString();
 
-            Resource subjectResource = model.getResource(String.valueOf(subjectResourceUriString));
+            Resource subjectResource = model.getResource(subjectResourceUriString);
             if (subjectResource == null) {
-                subjectResource = model.createResource(String.valueOf(subjectResourceUriString));
+                subjectResource = model.createResource(subjectResourceUriString);
             }
 
             for (Map.Entry<String, List<String>> entry : mapping.getProperties().entrySet()) {
                 Set<String> valueSet = new HashSet<>(entry.getValue());
 
-                //Property property = new PropertyImpl(defaultScheme, entry.getKey());
                 Property property = new PropertyImpl(entry.getKey());
                 for (String value : valueSet) {
                         subjectResource.addProperty(property, value);
@@ -207,12 +201,14 @@ public class RulesEngineImpl implements RulesEngine {
 
             for (Map.Entry<String, Set<URI>> rel : mapping
                     .getRelationships().entrySet()) {
-                        //Property relProperty =   new PropertyImpl(defaultScheme, rel.getKey());
                         Property relProperty =   new PropertyImpl(rel.getKey());
+                        String targetResourceUriString;
                         for (URI target : rel.getValue()) {
-                            Resource objectResource = model.getResource(String.valueOf(findURI(rootUri.relativize(target))));
+                            targetResourceUriString = String.valueOf(rootUri.relativize(target));
+                            URI targetResourceUri = findOrAssignURI(targetResourceUriString);
+                            Resource objectResource = model.getResource(String.valueOf(targetResourceUri));
                             if(objectResource == null) {
-                                objectResource = model.createResource(String.valueOf(findURI(rootUri.relativize(target))));
+                                objectResource = model.createResource(String.valueOf(targetResourceUri));
                             }
                             statements.add(new StatementImpl(subjectResource, relProperty, objectResource));
                         }
@@ -222,21 +218,22 @@ public class RulesEngineImpl implements RulesEngine {
         }
     }
 
-    private URI findURI(Object key)  {
-        String keyString = key.toString();
+    /**
+     *
+     * @param key - A string representing the Resource for which we need a URI - generally a relative path
+     * @return - a URI to identify this resource uniquely within the package
+     */
+    private URI findOrAssignURI(String key)  {
 
-        if (keyString.endsWith(File.separator)) {
-                keyString = keyString.substring(0, keyString.length() - 1);
-        }
-
-        if (entityUris.get(keyString) == null){
+        if (entityUris.get(key) == null){
             try {
-                entityUris.put(keyString, new URI("urn:" + UUID.randomUUID().toString()));
+                entityUris.put(key, new URI("urn:" + UUID.randomUUID().toString()));
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
         }
-        return entityUris.get(keyString);
+
+        return entityUris.get(key);
     }
 
 }

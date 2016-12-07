@@ -104,12 +104,12 @@ public class RulesEngineImplTest {
         InputStream zipInputStream =
                 org.dataconservancy.packaging.tool.impl.RulesEngineImplTest.class
                         .getClassLoader()
-                        .getResourceAsStream("RulesEngineTest.zip");
+                        .getResourceAsStream("TestContent/uc2a.zip");
         File temp =
-                tmpfolder.newFolder("RulesEngineTest");
+                tmpfolder.newFolder("uc2a");
 
         File zipFile =
-                tmpfolder.newFile("RulesEngineTest.zip");
+                tmpfolder.newFile("uc2a.zip");
 
         OutputStream zipOutputStream = new FileOutputStream(zipFile);
 
@@ -120,7 +120,7 @@ public class RulesEngineImplTest {
         ZipFile zip = new ZipFile(zipFile);
         zip.extractAll(temp.getPath());
 
-        rootArtifactDir = new File(temp, "content");
+        rootArtifactDir = new File(temp, "test");
         if (!rootArtifactDir.isDirectory()) {
             throw new RuntimeException();
         }

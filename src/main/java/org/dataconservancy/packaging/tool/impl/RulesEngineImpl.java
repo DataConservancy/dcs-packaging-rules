@@ -50,6 +50,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.dataconservancy.dcs.util.FilePathUtil.prependFileUriPrefix;
+
 /**
  * Created by jrm on 9/2/16.
  */
@@ -176,10 +178,18 @@ public class RulesEngineImpl implements RulesEngine {
                 relativeFilePathString = relativeFilePathString + "#" + mapping.getSpecifier();
             }
 
+
+            URI rootUri = null;
+            try {
+                rootUri = new URI("file:" + rootPath.toString());
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+
             URI uri = findURI(relativeFilePathString);
             String subjectResourceUriString = uri.toString();
 
-            Resource subjectResource = model.getResource(String.valueOf(findURI(subjectResourceUriString)));
+            Resource subjectResource = model.getResource(String.valueOf(subjectResourceUriString));
             if (subjectResource == null) {
                 subjectResource = model.createResource(String.valueOf(subjectResourceUriString));
             }
@@ -200,9 +210,9 @@ public class RulesEngineImpl implements RulesEngine {
                         //Property relProperty =   new PropertyImpl(defaultScheme, rel.getKey());
                         Property relProperty =   new PropertyImpl(rel.getKey());
                         for (URI target : rel.getValue()) {
-                            Resource objectResource = model.getResource(String.valueOf(findURI(target)));
+                            Resource objectResource = model.getResource(String.valueOf(findURI(rootUri.relativize(target))));
                             if(objectResource == null) {
-                                objectResource = model.createResource(String.valueOf(findURI(target)));
+                                objectResource = model.createResource(String.valueOf(findURI(rootUri.relativize(target))));
                             }
                             statements.add(new StatementImpl(subjectResource, relProperty, objectResource));
                         }
@@ -213,14 +223,20 @@ public class RulesEngineImpl implements RulesEngine {
     }
 
     private URI findURI(Object key)  {
-        if(entityUris.get(key) == null){
+        String keyString = key.toString();
+
+        if (keyString.endsWith(File.separator)) {
+                keyString = keyString.substring(0, keyString.length() - 1);
+        }
+
+        if (entityUris.get(keyString) == null){
             try {
-                entityUris.put(key, new URI("urn:" + UUID.randomUUID().toString()));
+                entityUris.put(keyString, new URI("urn:" + UUID.randomUUID().toString()));
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
         }
-        return entityUris.get(key);
+        return entityUris.get(keyString);
     }
 
 }

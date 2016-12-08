@@ -219,6 +219,9 @@ public class RulesEngineImpl implements RulesEngine {
     }
 
     /**
+     * When we encounter an entity for which we need a Resource in the Model, we look t osee if it has been created yet.
+     * This requires a URI. We check to see if the URI is present in the Map of Resources which have already been
+     * created. If it is there, we just return it. If not, we create a new one and return that.
      *
      * @param key - A string representing the Resource for which we need a URI - generally a relative path
      * @return - a URI to identify this resource uniquely within the package

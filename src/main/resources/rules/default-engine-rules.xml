@@ -16,7 +16,7 @@
 -->
 <rules xmlns="http://dataconservancy.org/schemas/rules/1.0/"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://dataconservancy.org/schemas/rules/1.0/ rules.xsd">
+	xsi:schemaLocation="http://dataconservancy.org/schemas/rules/1.0/rules.xsd">
 	<rule>
 		<!-- Ignore dotfiles and dot directories -->
 		<select action="exclude">
@@ -47,13 +47,13 @@
 			<mapping>
 				<type>Collection</type>
 				<properties>
-					<property name="createDate">
+					<property name="http://purl.org/dcterms/created">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="modifiedDate">
+					<property name="http://purl.org/dcterms/modified">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="title">
+					<property name="http://purl.org/dcterms/title">
 						<value type="FileMetadata" specifier="name" />
 					</property>
 				</properties>
@@ -104,20 +104,20 @@
 			<mapping>
 				<type>DataItem</type>
 				<properties>
-					<property name="createDate">
+					<property name="http://purl.org/dcterms/created">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="modifiedDate">
+					<property name="http://purl.org/dcterms/modified">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="name">
+					<property name="http://purl.org/dcterms/title">
 						<value type="FileMetadata" specifier="name" />
 					</property>
 				</properties>
 				<relationships>
 
 					<!-- DataItems are members of the parent directory's collection -->
-					<relationship name="isMemberOf">
+					<relationship name="http://purl.org/dcterms/isPartOf">
 						<file rel="parent" />
 					</relationship>
 
@@ -146,19 +146,19 @@
 			<mapping>
 				<type>Collection</type>
 				<properties>
-					<property name="createDate">
+					<property name="http://purl.org/dcterms/created">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="modifiedDate">
+					<property name="http://purl.org/dcterms/modified">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="title">
+					<property name="http://purl.org/dcterms/title">
 						<value type="FileMetadata" specifier="name" />
 					</property>
 				</properties>
 				<relationships>
 					<!-- Aggregate by project if parent is root (i.e. parent has no parents) -->
-					<relationship name="isMemberOf">
+					<relationship name="http://purl.org/dcterms/isPartOf">
 						<file rel="parent">
 							<test operation="count" max="0">
 								<file rel="parent" />
@@ -168,7 +168,7 @@
 
 					<!-- Aggregate by collection if the parent is a collection (i.e. has 
 						a parent) -->
-					<relationship name="isMemberOf">
+					<relationship name="http://purl.org/dcterms/isPartOf">
 						<file rel="parent">
 							<test operation="count" min="0">
 								<file rel="parent" />
@@ -218,24 +218,27 @@
 			<mapping>
 				<type>DataFile</type>
 				<properties>
-					<property name="createDate">
+					<property name="http://purl.org/dcterms/created">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="modifiedDate">
+					<property name="http://purl.org/dcterms/modifiedDate">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="size">
+					<property name="http://purl.org/dcterms/extent">
 						<value type="FileMetadata" specifier="size" />
 					</property>
-					<property name="fileName">
+					<property name="http://purl.org/dcterms/title">
 						<value type="FileMetadata" specifier="name" />
 					</property>
-					<property name="format">
+					<property name="http://purl.org/net/opmv/ns#hasFileName">
+						<value type="FileMetadata" specifier="name" />
+					</property>
+					<property name="http://purl.org/dcterms/format">
 						<value type="FileMetadata" specifier="format" />
 					</property>
 				</properties>
 				<relationships>
-					<relationship name="isMemberOf">
+					<relationship name="http://purl.org/dcterms/isPartOf">
 						<file rel="parent" />
 					</relationship>
 				</relationships>
@@ -281,20 +284,20 @@
 			<mapping specifier="0">
 				<type byteStream="false">DataItem</type>
 				<properties>
-					<property name="createDate">
+					<property name="http://purl.org/dcterms/created">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="modifiedDate">
+					<property name="http://purl.org/dcterms/modified">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="name">
+					<property name="http://purl.org/dcterms/title">
 						<value type="FileMetadata" specifier="name" />
 					</property>
 				</properties>
 				<relationships>
 
 					<!-- DataItems are members of the parent directory's collection -->
-					<relationship name="isMemberOf">
+					<relationship name="http://purl.org/dcterms/isPartOf">
 						<file rel="parent" />
 					</relationship>
 
@@ -303,24 +306,27 @@
 			<mapping>
 				<type byteStream="true">DataFile</type>
 				<properties>
-					<property name="createDate">
+					<property name="http://purl.org/dcterms/created">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="modifiedDate">
+					<property name="http://purl.org/dcterms/modified">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="size">
+					<property name="http://purl.org/dcterms/extent">
 						<value type="FileMetadata" specifier="size" />
 					</property>
-					<property name="fileName">
+					<property name="http://purl.org/dcterms/title">
 						<value type="FileMetadata" specifier="name" />
 					</property>
-					<property name="format">
+					<property name="http://purl.org/net/opmv/ns#hasFileName">
+						<value type="FileMetadata" specifier="name" />
+					</property>
+					<property name="http://purl.org/dcterms/format">
 						<value type="FileMetadata" specifier="format" />
 					</property>
 				</properties>
 				<relationships>
-					<relationship name="isMemberOf" specifier="0">
+					<relationship name="http://purl.org/dcterms/isPartOf" specifier="0">
 						<file rel="self" />
 					</relationship>
 				</relationships>
@@ -339,24 +345,27 @@
 			<mapping>
 				<type>MetadataFile</type>
 				<properties>
-					<property name="createDate">
+					<property name="http://purl.org/dcterms/created">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="modifiedDate">
+					<property name="http://purl.org/dcterms/modified">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="size">
+					<property name="http://purl.org/dcterms/extent">
 						<value type="FileMetadata" specifier="size" />
 					</property>
-					<property name="fileName">
+					<property name="http://purl.org/dcterms/title">
 						<value type="FileMetadata" specifier="name" />
 					</property>
-					<property name="format">
+					<property name="http://purl.org/net/opmv/ns#hasFileName">
+						<value type="FileMetadata" specifier="name" />
+					</property>
+					<property name="http://purl.org/dcterms/format">
 						<value type="FileMetadata" specifier="format" />
 					</property>
 				</properties>
 				<relationships>
-					<relationship name="isMetadataFor">
+					<relationship name="info:fedora/fedora-system:def/relations-external#isMetadataFor">
 						<file rel="parent" />
 					</relationship>
 				</relationships>

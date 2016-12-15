@@ -17,13 +17,23 @@
 package org.dataconservancy.packaging.tool.impl;
 
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.NodeIterator;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.ResIterator;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;
 import net.lingala.zip4j.core.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.dataconservancy.packaging.tool.api.RulesEngine;
 import org.dataconservancy.packaging.tool.model.PackageDescriptionRulesBuilder;
 import org.dataconservancy.packaging.tool.model.builder.xstream.JaxbPackageDescriptionRulesBuilder;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
@@ -31,8 +41,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jrm on 10/27/16.
@@ -43,9 +57,22 @@ public class RulesEngineImplTest {
 
     private static Model model;
 
+    private static Map<String, String> expectedUris = new HashMap<>();
+
+    private static Map<String, String> testUris = new HashMap<>();
+
+    private static Property fileNameProperty = new PropertyImpl("http://purl.org/net/opmv/ns#hasFileName");
+    private static Property titleProperty = new PropertyImpl("http://purl.org/dcterms/title");
+    private static Property memberProperty = new PropertyImpl("http://purl.org/dcterms/isPartOf");
+    private static Property createdProperty = new PropertyImpl("http://purl.org/dcterms/created");
+    private static Property modifiedProperty = new PropertyImpl("http://purl.org/dcterms/modified");
+    private static Property formatProperty = new PropertyImpl("http://purl.org/dcterms/format");
+    private static Property sizeProperty = new PropertyImpl("http://purl.org/dcterms/extent");
+    private static Property metadataProperty = new PropertyImpl("info:fedora/fedora-system:def/relations-external#isMetadataFor");
+    private static Property typeProperty = new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+
     /* Directories that should be projects */
     private static final List<String> ROOT_COLLECTION_PATHS = Arrays.asList("");
-
     /* Directories that should be empty collections */
     private static final List<String> EMPTY_COLLECTION_PATHS = Arrays
             .asList("empty_collection");
@@ -90,11 +117,25 @@ public class RulesEngineImplTest {
     private static final List<String> DOT_PATHS = Arrays
             .asList(".dotfile", ".dotdirectory", ".dotdirectory/excluded.txt");
 
-    //private static PackageDescription desc;
+    /* Properties that we should have on Projects */
+
+    /* Properties that we should have on Collections */
+    private static final List<Property> COLLECTION_PROPERTIES = Arrays
+            .asList(createdProperty, memberProperty, modifiedProperty, titleProperty);
+
+    /* Properties that we should have on DataItems */
+    private static final List<Property> DATA_ITEM_PROPERTIES = Arrays
+            .asList(createdProperty, memberProperty, modifiedProperty, titleProperty);
+
+    /* Properties that we should have on DataFiles */
+    private static final List<Property> DATA_FILE_PROPERTIES = Arrays
+            .asList(createdProperty, sizeProperty, formatProperty, memberProperty, modifiedProperty, titleProperty, fileNameProperty);
+
+    /* Properties that we should have on MetadataFiles */
+    private static final List<Property> METADATA_FILE_PROPERTIES = Arrays
+            .asList(createdProperty, sizeProperty, formatProperty, memberProperty, modifiedProperty, titleProperty, fileNameProperty, metadataProperty);
 
     private static File rootArtifactDir;
-
-    //private static String packageOntologyIdentifier = "ontologyIdentifier";
 
     @ClassRule
     public static TemporaryFolder tmpfolder = new TemporaryFolder();
@@ -104,12 +145,12 @@ public class RulesEngineImplTest {
         InputStream zipInputStream =
                 org.dataconservancy.packaging.tool.impl.RulesEngineImplTest.class
                         .getClassLoader()
-                        .getResourceAsStream("TestContent/uc2a.zip");
+                        .getResourceAsStream("RulesEngineTest.zip");
         File temp =
-                tmpfolder.newFolder("uc2a");
+                tmpfolder.newFolder("RulesEngineTest");
 
         File zipFile =
-                tmpfolder.newFile("uc2a.zip");
+                tmpfolder.newFile("RulesEngineTest.zip");
 
         OutputStream zipOutputStream = new FileOutputStream(zipFile);
 
@@ -120,18 +161,18 @@ public class RulesEngineImplTest {
         ZipFile zip = new ZipFile(zipFile);
         zip.extractAll(temp.getPath());
 
-        rootArtifactDir = new File(temp, "test");
+        rootArtifactDir = new File(temp, "content");
         if (!rootArtifactDir.isDirectory()) {
             throw new RuntimeException();
         }
 
-    /*
-     * OK, now that we have the content directory, load the rules and create
-     * a rules engine
-     */
+        /*
+         * OK, now that we have the content directory, load the rules and create
+         * a rules engine
+         */
         InputStream rulesStream =
                 org.dataconservancy.packaging.tool.impl.RulesEngineImplTest.class.getClassLoader()
-                        .getResourceAsStream("rules/default-rules.xml");
+                        .getResourceAsStream("rules/default-engine-rules.xml");
 
         PackageDescriptionRulesBuilder builder =
                 new JaxbPackageDescriptionRulesBuilder();
@@ -140,13 +181,244 @@ public class RulesEngineImplTest {
 
         model =  engine.generateRdf(rootArtifactDir);
 
+        // populate the map from filenames to URIs for the test model
+        // we need to map the URIs because they are generated on the fly by the RulesEngine
+        StmtIterator titleItr = model.listStatements(null, titleProperty, (RDFNode) null);
+        while(titleItr.hasNext()){
+            Statement s = titleItr.nextStatement();
+            testUris.put(s.getString(), s.getSubject().toString());
+        }
 
     }
 
     @Test
-    public void  spitOutModel(){
-             model.write(System.out,"TURTLE");
+    public void testExistence(){
+         for (String pathString : COLLECTION_PATHS) {
+             Path childPath = Paths.get(pathString);
+             String file = childPath.getFileName().toString();
+             Assert.assertNotNull(model.getResource(testUris.get(file)));
+         }
+
+         for (String pathString : DATA_ITEM_PATHS) {
+             Path childPath = Paths.get(pathString);
+             String file = childPath.getFileName().toString();
+             Assert.assertNotNull(model.getResource(testUris.get(file)));
+         }
+
+         for (String pathString : DATA_FILE_PATHS) {
+             Path childPath = Paths.get(pathString);
+             String file = childPath.getFileName().toString();
+             Assert.assertNotNull(model.getResource(testUris.get(file)));
+         }
+
+         for (String pathString : METADATA_FILE_PATHS) {
+             Path childPath = Paths.get(pathString);
+             String file = childPath.getFileName().toString();
+             Assert.assertNotNull(model.getResource(testUris.get(file)));
+         }
     }
 
-
+    @Test
+    public void testNonExistence(){
+        for (String pathString : DOT_PATHS) {
+           Path path = Paths.get(pathString);
+           String file = path.getFileName().toString();
+           Assert.assertNull(testUris.get(file));
+        }
     }
+
+    @Test
+    public void testMembership(){
+         for (String pathString : SUBCOLLECTION_PATHS) {
+             Path childPath = Paths.get(pathString);
+             String file = childPath.getFileName().toString();
+             String parent = childPath.getParent().getFileName().toString();
+             Resource subject = model.getResource(testUris.get(file));
+             Resource object = model.getResource(testUris.get(parent));
+
+             StmtIterator itr = model.listStatements(subject, memberProperty, object);
+             List<Statement> statementList = itr.toList();
+             Assert.assertEquals(1, statementList.size());
+         }
+
+         for (String pathString : DATA_ITEM_PATHS) {
+             Path childPath = Paths.get(pathString);
+             String file = childPath.getFileName().toString();
+             String parent = childPath.getParent().getFileName().toString();
+             Resource subject = model.getResource(testUris.get(file));
+             Resource object = model.getResource(testUris.get(parent));
+
+             StmtIterator itr = model.listStatements(subject, memberProperty, object);
+             List<Statement> statementList = itr.toList();
+             Assert.assertEquals(1, statementList.size());
+         }
+
+         for (String pathString : DATA_FILE_PATHS) {
+             Path childPath = Paths.get(pathString);
+             String file = childPath.getFileName().toString();
+             String parent = childPath.getParent().getFileName().toString();
+             Resource subject = model.getResource(testUris.get(file));
+             Resource object = model.getResource(testUris.get(parent));
+
+             StmtIterator itr = model.listStatements(subject, memberProperty, object);
+             List<Statement> statementList = itr.toList();
+             Assert.assertEquals(1, statementList.size());
+
+         }
+    }
+
+    @Test
+    public void testFileSizes(){
+        for (String pathString : DATA_FILE_PATHS) {
+             Path path = Paths.get(pathString);
+             String file = path.getFileName().toString();
+             Resource subject = model.getResource(testUris.get(file));
+             File dataFile = new File(rootArtifactDir, pathString);
+
+             StmtIterator itr = model.listStatements(subject, sizeProperty, String.valueOf(dataFile.length()));
+             List<Statement> statementList = itr.toList();
+             Assert.assertEquals(1, statementList.size());
+        }
+
+         for (String pathString : METADATA_FILE_PATHS) {
+             Path path = Paths.get(pathString);
+             String file = path.getFileName().toString();
+             Resource subject = model.getResource(testUris.get(file));
+             File dataFile = new File(rootArtifactDir, pathString);
+
+             StmtIterator itr = model.listStatements(subject, sizeProperty, String.valueOf(dataFile.length()));
+             List<Statement> statementList = itr.toList();
+             Assert.assertEquals(1, statementList.size());
+        }
+    }
+
+    @Test
+    public void testType(){
+        for (String pathString : COLLECTION_PATHS) {
+             Path path = Paths.get(pathString);
+             String file = path.getFileName().toString();
+             Resource subject = model.getResource(testUris.get(file));
+             File dataFile = new File(rootArtifactDir, pathString);
+
+             StmtIterator itr = model.listStatements(subject, typeProperty, "Collection");
+             List<Statement> statementList = itr.toList();
+             Assert.assertEquals(1, statementList.size());
+        }
+
+         for (String pathString : DATA_ITEM_PATHS) {
+             Path path = Paths.get(pathString);
+             String file = path.getFileName().toString();
+             Resource subject = model.getResource(testUris.get(file));
+             File dataFile = new File(rootArtifactDir, pathString);
+
+             StmtIterator itr = model.listStatements(subject, typeProperty, "DataItem");
+             List<Statement> statementList = itr.toList();
+             Assert.assertEquals(1, statementList.size());
+        }
+
+        for (String pathString : DATA_FILE_PATHS) {
+             Path path = Paths.get(pathString);
+             String file = path.getFileName().toString();
+             Resource subject = model.getResource(testUris.get(file));
+             File dataFile = new File(rootArtifactDir, pathString);
+
+             StmtIterator itr = model.listStatements(subject, typeProperty, "DataFile");
+             List<Statement> statementList = itr.toList();
+             Assert.assertEquals(1, statementList.size());
+        }
+
+        for (String pathString : METADATA_FILE_PATHS) {
+             Path path = Paths.get(pathString);
+             String file = path.getFileName().toString();
+             Resource subject = model.getResource(testUris.get(file));
+             File dataFile = new File(rootArtifactDir, pathString);
+
+             StmtIterator itr = model.listStatements(subject, typeProperty, "MetadataFile");
+             List<Statement> statementList = itr.toList();
+             Assert.assertEquals(1, statementList.size());
+        }
+    }
+
+    @Ignore
+    @Test
+    public void  spitOutModel() {
+        model.write(System.out, "TURTLE");
+    }
+    @Ignore
+    @Test
+    public void spitOutProperties(){
+        StmtIterator sitr = model.listStatements();
+        while(sitr.hasNext()){
+            Statement s = sitr.nextStatement();
+            System.out.println(s.getPredicate().toString());
+        }
+    }
+
+    @Ignore
+    @Test
+    public void  listObjects() {
+
+
+        Property typeProperty = new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+        StmtIterator typeItr = model.listStatements(null, typeProperty, (RDFNode) null);
+        while(typeItr.hasNext()){
+            Statement s = typeItr.nextStatement();
+            System.out.println(s.toString());
+            System.out.println(s.getSubject().toString());
+            System.out.println(s.getString());
+            System.out.println();
+        }
+
+        Property memberProperty = new PropertyImpl("isMemberOf");
+        StmtIterator memberItr = model.listStatements(null, memberProperty, (RDFNode) null);
+        while(memberItr.hasNext()){
+            Statement s = memberItr.nextStatement();
+            System.out.println(s.toString());
+            System.out.println(s.getSubject().toString());
+            System.out.println(s.getObject().toString());
+            System.out.println();
+        }
+
+        //Property nameProperty = new PropertyImpl("name");
+        ResIterator ritr = model.listSubjects();
+        //ResIterator ritr = model.listResourcesWithProperty(nameProperty);
+        while(ritr.hasNext()){
+            Resource r = ritr.nextResource();
+            System.out.println(r.toString());
+            System.out.println();
+        }
+
+
+
+        //Property fileNameProperty = new PropertyImpl("fileName");
+        ResIterator rfitr = model.listResourcesWithProperty(fileNameProperty);
+        while(rfitr.hasNext()){
+            Resource r = rfitr.nextResource();
+            System.out.println(r.toString());
+            System.out.println();
+        }
+
+        //Property titleProperty = new PropertyImpl("title");
+        ResIterator titr = model.listResourcesWithProperty(titleProperty);
+        while(titr.hasNext()){
+            Resource r = titr.nextResource();
+            System.out.println(r.toString());
+            System.out.println();
+        }
+
+
+        //Property typeProperty = new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+        ResIterator tyItr = model.listResourcesWithProperty(typeProperty);
+        while(typeItr.hasNext()){
+            Resource r = tyItr.nextResource();
+            //System.out.println(r.toString());
+            NodeIterator nodeItr = model.listObjectsOfProperty(typeProperty);
+            while (nodeItr.hasNext()){
+                RDFNode n = nodeItr.nextNode();
+                System.out.println(n.toString());
+            }
+            System.out.println();
+        }
+    }
+
+}

@@ -39,8 +39,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,7 +50,11 @@ import java.util.stream.Collectors;
 
 
 /**
- * Created by jrm on 9/2/16.
+ * This class traverses a file tree containing content, and processes rules for each file system entity encountered.
+ * The end result is a jena model which contains resources and statements as specified by the rules. Since rules may
+ * create relationships to other resources which may not have been previously encountered in the traversal, we create
+ * jena resources for any referenced entities on the fly, even if before they are encountered in the traversal.
+ * This allows us to process the rules in a single pass through the content.
  */
 
 public class RulesEngineImpl implements RulesEngine {
@@ -88,11 +90,11 @@ public class RulesEngineImpl implements RulesEngine {
         */
         visitedFiles.clear();
 
-    /*
-     * Create resources for each filesystem entity and add Statements to the Statement list
-     */
-
+        /*
+         * Create resources for each filesystem entity and add Statements to the Statement list
+         */
         visitFile(new FileContextImpl(directoryTreeRoot, directoryTreeRoot, false));
+
         //finally, dump all the statements into the model
         model.add(statements);
         return model;
@@ -129,29 +131,32 @@ public class RulesEngineImpl implements RulesEngine {
                     e);
         }
 
-        try {
-            for (Rule rule : rules) {
-                if (rule.select(cxt)) {
-                    if (Action.EXCLUDE.equals(rule.getAction())) {
-                        cxt.setIgnored(true);
-                        continue;
-                    } else if (Action.INCLUDE.equals(rule.getAction())) {
-                        populate(cxt, rule);
+
+        if (!cxt.isIgnored()) { //new
+            try {
+                for (Rule rule : rules) {
+                    if (rule.select(cxt)) {
+                        if (Action.EXCLUDE.equals(rule.getAction())) {
+                            cxt.setIgnored(true);
+                            break;
+                        } else if (Action.INCLUDE.equals(rule.getAction())) {
+                            populate(cxt, rule);
+                        }
+
+                        break;
                     }
-
-                    break;
                 }
+
+            } catch (Exception e) {
+                throw new RulesEngineException("Error applying rules to pathname "
+                        + cxt.getFile()
+
+                        .toString()
+                        + ": \n"
+                        + e.getMessage(),
+                        e);
             }
-
-        } catch (Exception e) {
-            throw new RulesEngineException("Error applying rules to pathname "
-                    + cxt.getFile()
-
-                    .toString()
-                    + ": \n"
-                    + e.getMessage(),
-                    e);
-        }
+        } //new
 
         if (cxt.getFile().isDirectory()) {
             for (File child : cxt.getFile().listFiles()) {
@@ -166,7 +171,7 @@ public class RulesEngineImpl implements RulesEngine {
      * of a relationship for example.
      */
     private void populate(FileContext cxt,
-                          Rule rule) {
+                          Rule rule) throws RulesEngineException {
         List<Mapping> mappings = rule.getMappings(cxt);
 
         for (Mapping mapping : mappings) {
@@ -181,9 +186,11 @@ public class RulesEngineImpl implements RulesEngine {
                 relativeFilePathString = relativeFilePathString + "#" + mapping.getSpecifier();
             }
 
+            //grab the package URI for this resource if it exists already, create it if not
             URI uri = findOrAssignURI(relativeFilePathString);
             String subjectResourceUriString = uri.toString();
 
+            //... and grab the resource if it exists already, create it if not
             Resource subjectResource = model.getResource(subjectResourceUriString);
             if (subjectResource == null) {
                 subjectResource = model.createResource(subjectResourceUriString);
@@ -205,7 +212,9 @@ public class RulesEngineImpl implements RulesEngine {
                         String targetResourceUriString;
                         for (URI target : rel.getValue()) {
                             targetResourceUriString = String.valueOf(rootUri.relativize(target));
+                            //grab the package URI for this resource if it exists already, create it if not
                             URI targetResourceUri = findOrAssignURI(targetResourceUriString);
+                            //... and grab the resource if it exists already, create it if not
                             Resource objectResource = model.getResource(String.valueOf(targetResourceUri));
                             if(objectResource == null) {
                                 objectResource = model.createResource(String.valueOf(targetResourceUri));
@@ -219,20 +228,20 @@ public class RulesEngineImpl implements RulesEngine {
     }
 
     /**
-     * When we encounter an entity for which we need a Resource in the Model, we look t osee if it has been created yet.
+     * When we encounter an entity for which we need a Resource in the Model, we look to see if it has been created yet.
      * This requires a URI. We check to see if the URI is present in the Map of Resources which have already been
      * created. If it is there, we just return it. If not, we create a new one and return that.
      *
      * @param key - A string representing the Resource for which we need a URI - generally a relative path
      * @return - a URI to identify this resource uniquely within the package
      */
-    private URI findOrAssignURI(String key)  {
+    private URI findOrAssignURI(String key) throws RulesEngineException {
 
         if (entityUris.get(key) == null){
             try {
-                entityUris.put(key, new URI("urn:" + UUID.randomUUID().toString()));
+                entityUris.put(key, new URI("urn::" + UUID.randomUUID().toString()));
             } catch (URISyntaxException e) {
-                e.printStackTrace();
+                throw new RulesEngineException("Error creating URI for " + key, e);
             }
         }
 

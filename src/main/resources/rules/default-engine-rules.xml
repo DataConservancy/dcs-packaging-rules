@@ -47,13 +47,13 @@
 			<mapping>
 				<type>Collection</type>
 				<properties>
-					<property name="http://purl.org/dcterms/created">
+					<property name="http://dataconservancy.org/business-object-model#hasCreateDate">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="http://purl.org/dcterms/modified">
+					<property name="http://dataconservancy.org/business-object-model#hasModifiedDate">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="http://purl.org/dcterms/title">
+					<property name="http://dataconservancy.org/business-object-model#hasTitle">
 						<value type="FileMetadata" specifier="name" />
 					</property>
 				</properties>
@@ -104,20 +104,20 @@
 			<mapping>
 				<type>DataItem</type>
 				<properties>
-					<property name="http://purl.org/dcterms/created">
+					<property name="http://dataconservancy.org/business-object-model#hasCreateDate">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="http://purl.org/dcterms/modified">
+					<property name="http://dataconservancy.org/business-object-model#hasModifiedDate">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="http://purl.org/dcterms/title">
+					<property name="http://dataconservancy.org/business-object-model#hasTitle">
 						<value type="FileMetadata" specifier="name" />
 					</property>
 				</properties>
 				<relationships>
 
 					<!-- DataItems are members of the parent directory's collection -->
-					<relationship name="http://purl.org/dcterms/isPartOf">
+					<relationship name="http://dataconservancy.org/business-object-model#isMemberOf">
 						<file rel="parent" />
 					</relationship>
 
@@ -146,19 +146,19 @@
 			<mapping>
 				<type>Collection</type>
 				<properties>
-					<property name="http://purl.org/dcterms/created">
+					<property name="http://dataconservancy.org/business-object-model#hasCreateDate">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="http://purl.org/dcterms/modified">
+					<property name="http://dataconservancy.org/business-object-model#hasModifiedDate">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="http://purl.org/dcterms/title">
+					<property name="http://dataconservancy.org/business-object-model#hasTitle">
 						<value type="FileMetadata" specifier="name" />
 					</property>
 				</properties>
 				<relationships>
 					<!-- Aggregate by project if parent is root (i.e. parent has no parents) -->
-					<relationship name="http://purl.org/dcterms/isPartOf">
+					<relationship name="http://dataconservancy.org/business-object-model#isMemberOf">
 						<file rel="parent">
 							<test operation="count" max="0">
 								<file rel="parent" />
@@ -168,7 +168,7 @@
 
 					<!-- Aggregate by collection if the parent is a collection (i.e. has 
 						a parent) -->
-					<relationship name="http://purl.org/dcterms/isPartOf">
+					<relationship name="http://dataconservancy.org/business-object-model#isMemberOf">
 						<file rel="parent">
 							<test operation="count" min="0">
 								<file rel="parent" />
@@ -218,27 +218,24 @@
 			<mapping>
 				<type>DataFile</type>
 				<properties>
-					<property name="http://purl.org/dcterms/created">
+					<property name="http://dataconservancy.org/business-object-model#hasCreateDate">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="http://purl.org/dcterms/modifiedDate">
+					<property name="http://dataconservancy.org/business-object-model#hasModifiedDate">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="http://purl.org/dcterms/extent">
+					<property name="http://dataconservancy.org/business-object-model#hasSize">
 						<value type="FileMetadata" specifier="size" />
 					</property>
-					<property name="http://purl.org/dcterms/title">
+					<property name="http://dataconservancy.org/business-object-model#hasTitle">
 						<value type="FileMetadata" specifier="name" />
 					</property>
-					<property name="http://purl.org/net/opmv/ns#hasFileName">
-						<value type="FileMetadata" specifier="name" />
-					</property>
-					<property name="http://purl.org/dcterms/format">
+					<property name="http://dataconservancy.org/business-object-model#hasFormat">
 						<value type="FileMetadata" specifier="format" />
 					</property>
 				</properties>
 				<relationships>
-					<relationship name="http://purl.org/dcterms/isPartOf">
+					<relationship name="http://dataconservancy.org/business-object-model#isMemberOf">
 						<file rel="parent" />
 					</relationship>
 				</relationships>
@@ -284,20 +281,20 @@
 			<mapping specifier="0">
 				<type byteStream="false">DataItem</type>
 				<properties>
-					<property name="http://purl.org/dcterms/created">
+					<property name="http://dataconservancy.org/business-object-model#hasCreateDate">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="http://purl.org/dcterms/modified">
+					<property name="http://dataconservancy.org/business-object-model#hasModifiedDate">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="http://purl.org/dcterms/title">
+					<property name="http://dataconservancy.org/business-object-model#hasTitle">
 						<value type="FileMetadata" specifier="name" />
 					</property>
 				</properties>
 				<relationships>
 
 					<!-- DataItems are members of the parent directory's collection -->
-					<relationship name="http://purl.org/dcterms/isPartOf">
+					<relationship name="http://dataconservancy.org/business-object-model#isMemberOf">
 						<file rel="parent" />
 					</relationship>
 
@@ -306,27 +303,24 @@
 			<mapping>
 				<type byteStream="true">DataFile</type>
 				<properties>
-					<property name="http://purl.org/dcterms/created">
+					<property name="http://dataconservancy.org/business-object-model#hasCreateDate">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="http://purl.org/dcterms/modified">
+					<property name="http://dataconservancy.org/business-object-model#hasModifiedDate">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="http://purl.org/dcterms/extent">
+					<property name="http://dataconservancy.org/business-object-model#hasSize">
 						<value type="FileMetadata" specifier="size" />
 					</property>
-					<property name="http://purl.org/dcterms/title">
+					<property name="http://dataconservancy.org/business-object-model#hasTitle">
 						<value type="FileMetadata" specifier="name" />
 					</property>
-					<property name="http://purl.org/net/opmv/ns#hasFileName">
-						<value type="FileMetadata" specifier="name" />
-					</property>
-					<property name="http://purl.org/dcterms/format">
+					<property name="http://dataconservancy.org/business-object-model#hasFormat">
 						<value type="FileMetadata" specifier="format" />
 					</property>
 				</properties>
 				<relationships>
-					<relationship name="http://purl.org/dcterms/isPartOf" specifier="0">
+					<relationship name="http://dataconservancy.org/business-object-model#isMemberOf" specifier="0">
 						<file rel="self" />
 					</relationship>
 				</relationships>
@@ -345,27 +339,24 @@
 			<mapping>
 				<type>MetadataFile</type>
 				<properties>
-					<property name="http://purl.org/dcterms/created">
+					<property name="http://dataconservancy.org/business-object-model#hasCreateDate">
 						<value type="FileMetadata" specifier="createDate" />
 					</property>
-					<property name="http://purl.org/dcterms/modified">
+					<property name="http://dataconservancy.org/business-object-model#hasModifiedDate">
 						<value type="FileMetadata" specifier="modifiedDate" />
 					</property>
-					<property name="http://purl.org/dcterms/extent">
+					<property name="http://dataconservancy.org/business-object-model#hasSize">
 						<value type="FileMetadata" specifier="size" />
 					</property>
-					<property name="http://purl.org/dcterms/title">
+					<property name="http://dataconservancy.org/business-object-model#hasTitle">
 						<value type="FileMetadata" specifier="name" />
 					</property>
-					<property name="http://purl.org/net/opmv/ns#hasFileName">
-						<value type="FileMetadata" specifier="name" />
-					</property>
-					<property name="http://purl.org/dcterms/format">
+					<property name="http://dataconservancy.org/business-object-model#hasFormat">
 						<value type="FileMetadata" specifier="format" />
 					</property>
 				</properties>
 				<relationships>
-					<relationship name="info:fedora/fedora-system:def/relations-external#isMetadataFor">
+					<relationship name="http://dataconservancy.org/business-object-model#isMetadataFor">
 						<file rel="parent" />
 					</relationship>
 				</relationships>

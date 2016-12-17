@@ -57,18 +57,16 @@ public class RulesEngineImplTest {
 
     private static Model model;
 
-    private static Map<String, String> expectedUris = new HashMap<>();
-
     private static Map<String, String> testUris = new HashMap<>();
 
-    private static Property fileNameProperty = new PropertyImpl("http://purl.org/net/opmv/ns#hasFileName");
-    private static Property titleProperty = new PropertyImpl("http://purl.org/dcterms/title");
-    private static Property memberProperty = new PropertyImpl("http://purl.org/dcterms/isPartOf");
-    private static Property createdProperty = new PropertyImpl("http://purl.org/dcterms/created");
-    private static Property modifiedProperty = new PropertyImpl("http://purl.org/dcterms/modified");
-    private static Property formatProperty = new PropertyImpl("http://purl.org/dcterms/format");
-    private static Property sizeProperty = new PropertyImpl("http://purl.org/dcterms/extent");
-    private static Property metadataProperty = new PropertyImpl("info:fedora/fedora-system:def/relations-external#isMetadataFor");
+    private static String propertyUriBase = "http://dataconservancy.org/business-object-model#";
+    private static Property titleProperty = new PropertyImpl(propertyUriBase + "hasTitle");
+    private static Property memberProperty = new PropertyImpl(propertyUriBase + "isMemberOf");
+    private static Property createdProperty = new PropertyImpl(propertyUriBase + "hasCreateDate");
+    private static Property modifiedProperty = new PropertyImpl(propertyUriBase + "hasModifiedDate");
+    private static Property formatProperty = new PropertyImpl(propertyUriBase + "hasFormat");
+    private static Property sizeProperty = new PropertyImpl(propertyUriBase + "hasSize");
+    private static Property metadataProperty = new PropertyImpl(propertyUriBase + "isMetadataFor");
     private static Property typeProperty = new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
 
     /* Directories that should be projects */
@@ -129,11 +127,11 @@ public class RulesEngineImplTest {
 
     /* Properties that we should have on DataFiles */
     private static final List<Property> DATA_FILE_PROPERTIES = Arrays
-            .asList(createdProperty, sizeProperty, formatProperty, memberProperty, modifiedProperty, titleProperty, fileNameProperty);
+            .asList(createdProperty, sizeProperty, formatProperty, memberProperty, modifiedProperty, titleProperty);
 
     /* Properties that we should have on MetadataFiles */
     private static final List<Property> METADATA_FILE_PROPERTIES = Arrays
-            .asList(createdProperty, sizeProperty, formatProperty, memberProperty, modifiedProperty, titleProperty, fileNameProperty, metadataProperty);
+            .asList(createdProperty, sizeProperty, formatProperty, memberProperty, modifiedProperty, titleProperty, metadataProperty);
 
     private static File rootArtifactDir;
 
@@ -388,15 +386,6 @@ public class RulesEngineImplTest {
             System.out.println();
         }
 
-
-
-        //Property fileNameProperty = new PropertyImpl("fileName");
-        ResIterator rfitr = model.listResourcesWithProperty(fileNameProperty);
-        while(rfitr.hasNext()){
-            Resource r = rfitr.nextResource();
-            System.out.println(r.toString());
-            System.out.println();
-        }
 
         //Property titleProperty = new PropertyImpl("title");
         ResIterator titr = model.listResourcesWithProperty(titleProperty);

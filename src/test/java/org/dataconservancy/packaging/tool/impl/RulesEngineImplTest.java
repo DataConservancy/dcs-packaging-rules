@@ -115,24 +115,6 @@ public class RulesEngineImplTest {
     private static final List<String> DOT_PATHS = Arrays
             .asList(".dotfile", ".dotdirectory", ".dotdirectory/excluded.txt");
 
-    /* Properties that we should have on Projects */
-
-    /* Properties that we should have on Collections */
-    private static final List<Property> COLLECTION_PROPERTIES = Arrays
-            .asList(createdProperty, memberProperty, modifiedProperty, titleProperty);
-
-    /* Properties that we should have on DataItems */
-    private static final List<Property> DATA_ITEM_PROPERTIES = Arrays
-            .asList(createdProperty, memberProperty, modifiedProperty, titleProperty);
-
-    /* Properties that we should have on DataFiles */
-    private static final List<Property> DATA_FILE_PROPERTIES = Arrays
-            .asList(createdProperty, sizeProperty, formatProperty, memberProperty, modifiedProperty, titleProperty);
-
-    /* Properties that we should have on MetadataFiles */
-    private static final List<Property> METADATA_FILE_PROPERTIES = Arrays
-            .asList(createdProperty, sizeProperty, formatProperty, memberProperty, modifiedProperty, titleProperty, metadataProperty);
-
     private static File rootArtifactDir;
 
     @ClassRule
@@ -337,11 +319,14 @@ public class RulesEngineImplTest {
         }
     }
 
+
+    //a few exploratory test methods, delete when this class is finished
     @Ignore
     @Test
     public void  spitOutModel() {
         model.write(System.out, "TURTLE");
     }
+
     @Ignore
     @Test
     public void spitOutProperties(){
@@ -356,7 +341,6 @@ public class RulesEngineImplTest {
     @Test
     public void  listObjects() {
 
-
         Property typeProperty = new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
         StmtIterator typeItr = model.listStatements(null, typeProperty, (RDFNode) null);
         while(typeItr.hasNext()){
@@ -367,7 +351,6 @@ public class RulesEngineImplTest {
             System.out.println();
         }
 
-        Property memberProperty = new PropertyImpl("isMemberOf");
         StmtIterator memberItr = model.listStatements(null, memberProperty, (RDFNode) null);
         while(memberItr.hasNext()){
             Statement s = memberItr.nextStatement();
@@ -377,17 +360,14 @@ public class RulesEngineImplTest {
             System.out.println();
         }
 
-        //Property nameProperty = new PropertyImpl("name");
+
         ResIterator ritr = model.listSubjects();
-        //ResIterator ritr = model.listResourcesWithProperty(nameProperty);
         while(ritr.hasNext()){
             Resource r = ritr.nextResource();
             System.out.println(r.toString());
             System.out.println();
         }
 
-
-        //Property titleProperty = new PropertyImpl("title");
         ResIterator titr = model.listResourcesWithProperty(titleProperty);
         while(titr.hasNext()){
             Resource r = titr.nextResource();
@@ -395,8 +375,6 @@ public class RulesEngineImplTest {
             System.out.println();
         }
 
-
-        //Property typeProperty = new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
         ResIterator tyItr = model.listResourcesWithProperty(typeProperty);
         while(typeItr.hasNext()){
             Resource r = tyItr.nextResource();

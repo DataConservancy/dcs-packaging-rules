@@ -297,6 +297,7 @@ public class RulesEngineImplTest {
            pathString = pathString.replace('/', File.separatorChar);
            Path path = Paths.get(pathString);
            String file = path.getFileName().toString();
+           //both the DataItem and the DataFile will have title equal to the file name
            StmtIterator itr = model.listStatements(null, titleProperty, file );
            List<Statement> statementList = itr.toList();
            Assert.assertEquals(2, statementList.size());
@@ -318,6 +319,7 @@ public class RulesEngineImplTest {
            Assert.assertTrue((statementList0.size() == 0 && statementList1.size() == 1)
            || (statementList0.size() == 1 && statementList1.size() == 0));
 
+           //Sort out which one is the DataItem, and which is the DataFile
            Resource dataItemResource;
            Resource dataFileResource;
            if (statementList0.size() == 0 && statementList1.size() == 1) {
@@ -328,15 +330,18 @@ public class RulesEngineImplTest {
                dataFileResource = resource0;
            }
 
+           //verify the DataFile / DataItem relationship
            StmtIterator itr2 = model.listStatements(dataFileResource, memberProperty, dataItemResource);
            List<Statement> statementList2 = itr2.toList();
            Assert.assertEquals(1, statementList2.size());
 
+           //The parent of the file object in the system will be the containing collection for the DataItem
            String parent = path.getParent().getFileName().toString();
            Resource object = model.getResource(testUris.get(parent));
 
            StmtIterator itr3 = model.listStatements(dataItemResource, memberProperty, object);
 
+           //verify the DataItem / Collection relationship
            List<Statement> statementList3 = itr3.toList();
            Assert.assertEquals(1, statementList3.size());
         }
@@ -622,14 +627,6 @@ public class RulesEngineImplTest {
             Assert.assertTrue(detectedStatements.size() > 0);
 
        }
-    }
-
-
-    //an exploratory test method, can delete when this class is finished
-
-    @Test
-    public void  spitOutModel() {
-        model.write(System.out, "TURTLE");
     }
 
 }

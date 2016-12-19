@@ -17,23 +17,23 @@
 package org.dataconservancy.packaging.tool.impl;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;
 import net.lingala.zip4j.core.ZipFile;
 import org.apache.commons.io.IOUtils;
+import org.dataconservancy.dcs.model.DetectedFormat;
+import org.dataconservancy.dcs.util.ContentDetectionService;
+import org.dataconservancy.dcs.util.DateUtility;
 import org.dataconservancy.packaging.tool.api.RulesEngine;
 import org.dataconservancy.packaging.tool.model.PackageDescriptionRulesBuilder;
 import org.dataconservancy.packaging.tool.model.builder.xstream.JaxbPackageDescriptionRulesBuilder;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
@@ -41,25 +41,29 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Created by jrm on 10/27/16.
+ * Test Class for RulesEngineImpl
  */
 public class RulesEngineImplTest {
-
-    private static RulesEngine engine;
 
     private static Model model;
 
     private static Map<String, String> testUris = new HashMap<>();
 
     private static String propertyUriBase = "http://dataconservancy.org/business-object-model#";
+
     private static Property titleProperty = new PropertyImpl(propertyUriBase + "hasTitle");
     private static Property memberProperty = new PropertyImpl(propertyUriBase + "isMemberOf");
     private static Property createdProperty = new PropertyImpl(propertyUriBase + "hasCreateDate");
@@ -70,23 +74,26 @@ public class RulesEngineImplTest {
     private static Property typeProperty = new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
 
     /* Directories that should be projects */
-    private static final List<String> ROOT_COLLECTION_PATHS = Arrays.asList("");
+    //private static final List<String> ROOT_COLLECTION_PATHS = Arrays.asList("");
     /* Directories that should be empty collections */
-    private static final List<String> EMPTY_COLLECTION_PATHS = Arrays
-            .asList("empty_collection");
+    //private static final List<String> EMPTY_COLLECTION_PATHS = Arrays
+    //        .asList("empty_collection");
 
     /* Directories that should be collections */
     private static final List<String> COLLECTION_PATHS = Arrays
             .asList("collection1",
                     "collection2",
                     "empty_collection",
+                    "hybrid_collection",
+                    "hybrid_collection/subcollection",
                     "collection2/subcollection2.0",
                     "collection2/subcollection2.1");
 
     /* Directories that are collections, but also subcollections */
     private static final List<String> SUBCOLLECTION_PATHS = Arrays
             .asList("collection2/subcollection2.0",
-                    "collection2/subcollection2.1");
+                    "collection2/subcollection2.1",
+                    "hybrid_collection/subcollection");
 
     /* Directories that should be DataItems */
     private static final List<String> DATA_ITEM_PATHS = Arrays
@@ -114,6 +121,11 @@ public class RulesEngineImplTest {
 
     private static final List<String> DOT_PATHS = Arrays
             .asList(".dotfile", ".dotdirectory", ".dotdirectory/excluded.txt");
+
+    private static final List<String> HYBRID_PATHS = Arrays
+            .asList("hybrid_collection/impliedDataFile1",
+                    "hybrid_collection/impliedDataFile2",
+                    "hybrid_collection/impliedDataFile3");
 
     private static File rootArtifactDir;
 
@@ -157,7 +169,7 @@ public class RulesEngineImplTest {
         PackageDescriptionRulesBuilder builder =
                 new JaxbPackageDescriptionRulesBuilder();
 
-        engine = new RulesEngineImpl(builder.buildPackageDescriptionRules(rulesStream));
+        RulesEngine engine = new RulesEngineImpl(builder.buildPackageDescriptionRules(rulesStream));
 
         model =  engine.generateRdf(rootArtifactDir);
 
@@ -174,24 +186,28 @@ public class RulesEngineImplTest {
     @Test
     public void testExistence(){
          for (String pathString : COLLECTION_PATHS) {
+             pathString = pathString.replace('/', File.separatorChar);
              Path childPath = Paths.get(pathString);
              String file = childPath.getFileName().toString();
              Assert.assertNotNull(model.getResource(testUris.get(file)));
          }
 
          for (String pathString : DATA_ITEM_PATHS) {
+             pathString = pathString.replace('/', File.separatorChar);
              Path childPath = Paths.get(pathString);
              String file = childPath.getFileName().toString();
              Assert.assertNotNull(model.getResource(testUris.get(file)));
          }
 
          for (String pathString : DATA_FILE_PATHS) {
+             pathString = pathString.replace('/', File.separatorChar);
              Path childPath = Paths.get(pathString);
              String file = childPath.getFileName().toString();
              Assert.assertNotNull(model.getResource(testUris.get(file)));
          }
 
          for (String pathString : METADATA_FILE_PATHS) {
+             pathString = pathString.replace('/', File.separatorChar);
              Path childPath = Paths.get(pathString);
              String file = childPath.getFileName().toString();
              Assert.assertNotNull(model.getResource(testUris.get(file)));
@@ -201,15 +217,17 @@ public class RulesEngineImplTest {
     @Test
     public void testNonExistence(){
         for (String pathString : DOT_PATHS) {
-           Path path = Paths.get(pathString);
-           String file = path.getFileName().toString();
-           Assert.assertNull(testUris.get(file));
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Assert.assertNull(testUris.get(file));
         }
     }
 
     @Test
     public void testMembership(){
-         for (String pathString : SUBCOLLECTION_PATHS) {
+        for (String pathString : SUBCOLLECTION_PATHS) {
+             pathString = pathString.replace('/', File.separatorChar);
              Path childPath = Paths.get(pathString);
              String file = childPath.getFileName().toString();
              String parent = childPath.getParent().getFileName().toString();
@@ -219,9 +237,10 @@ public class RulesEngineImplTest {
              StmtIterator itr = model.listStatements(subject, memberProperty, object);
              List<Statement> statementList = itr.toList();
              Assert.assertEquals(1, statementList.size());
-         }
+        }
 
-         for (String pathString : DATA_ITEM_PATHS) {
+        for (String pathString : DATA_ITEM_PATHS) {
+             pathString = pathString.replace('/', File.separatorChar);
              Path childPath = Paths.get(pathString);
              String file = childPath.getFileName().toString();
              String parent = childPath.getParent().getFileName().toString();
@@ -231,9 +250,10 @@ public class RulesEngineImplTest {
              StmtIterator itr = model.listStatements(subject, memberProperty, object);
              List<Statement> statementList = itr.toList();
              Assert.assertEquals(1, statementList.size());
-         }
+        }
 
-         for (String pathString : DATA_FILE_PATHS) {
+        for (String pathString : DATA_FILE_PATHS) {
+             pathString = pathString.replace('/', File.separatorChar);
              Path childPath = Paths.get(pathString);
              String file = childPath.getFileName().toString();
              String parent = childPath.getParent().getFileName().toString();
@@ -244,148 +264,372 @@ public class RulesEngineImplTest {
              List<Statement> statementList = itr.toList();
              Assert.assertEquals(1, statementList.size());
 
-         }
+        }
+    }
+
+
+    @Test
+    public void testMetadataness() {
+        for (String pathString : METADATA_FILE_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path childPath = Paths.get(pathString);
+            String file = childPath.getFileName().toString();
+            String parent;
+
+            if(childPath.getParent() == null){
+                parent = "content";
+            } else {
+                parent = childPath.getParent().getFileName().toString();
+            }
+
+            Resource subject = model.getResource(testUris.get(file));
+            Resource object = model.getResource(testUris.get(parent));
+
+            StmtIterator itr = model.listStatements(subject, metadataProperty, object);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
+        }
+    }
+
+    @Test
+    public void testHybrids(){
+        for (String pathString : HYBRID_PATHS) {
+           pathString = pathString.replace('/', File.separatorChar);
+           Path path = Paths.get(pathString);
+           String file = path.getFileName().toString();
+           StmtIterator itr = model.listStatements(null, titleProperty, file );
+           List<Statement> statementList = itr.toList();
+           Assert.assertEquals(2, statementList.size());
+
+
+           System.out.println(statementList.get(0).getSubject().getURI());
+           Resource resource0 = model.getResource(statementList.get(0).getSubject().getURI());
+           Resource resource1 = model.getResource(statementList.get(1).getSubject().getURI());
+
+           Assert.assertNotNull(resource0);
+           Assert.assertNotNull(resource1);
+
+           StmtIterator itr0 = model.listStatements(resource0, memberProperty, resource1);
+           StmtIterator itr1 = model.listStatements(resource1, memberProperty, resource0);
+           List<Statement> statementList0 = itr0.toList();
+           List<Statement> statementList1 = itr1.toList();
+
+           //one of these has to be the container of the other
+           Assert.assertTrue((statementList0.size() == 0 && statementList1.size() == 1)
+           || (statementList0.size() == 1 && statementList1.size() == 0));
+
+           Resource dataItemResource;
+           Resource dataFileResource;
+           if (statementList0.size() == 0 && statementList1.size() == 1) {
+               dataItemResource = resource0;
+               dataFileResource = resource1;
+           } else {
+               dataItemResource = resource1;
+               dataFileResource = resource0;
+           }
+
+           StmtIterator itr2 = model.listStatements(dataFileResource, memberProperty, dataItemResource);
+           List<Statement> statementList2 = itr2.toList();
+           Assert.assertEquals(1, statementList2.size());
+
+           String parent = path.getParent().getFileName().toString();
+           Resource object = model.getResource(testUris.get(parent));
+
+           StmtIterator itr3 = model.listStatements(dataItemResource, memberProperty, object);
+
+           List<Statement> statementList3 = itr3.toList();
+           Assert.assertEquals(1, statementList3.size());
+        }
     }
 
     @Test
     public void testFileSizes(){
         for (String pathString : DATA_FILE_PATHS) {
-             Path path = Paths.get(pathString);
-             String file = path.getFileName().toString();
-             Resource subject = model.getResource(testUris.get(file));
-             File dataFile = new File(rootArtifactDir, pathString);
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File dataFile = new File(rootArtifactDir, pathString);
 
-             StmtIterator itr = model.listStatements(subject, sizeProperty, String.valueOf(dataFile.length()));
-             List<Statement> statementList = itr.toList();
-             Assert.assertEquals(1, statementList.size());
+            StmtIterator itr = model.listStatements(subject, sizeProperty, String.valueOf(dataFile.length()));
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
         }
 
-         for (String pathString : METADATA_FILE_PATHS) {
-             Path path = Paths.get(pathString);
-             String file = path.getFileName().toString();
-             Resource subject = model.getResource(testUris.get(file));
-             File dataFile = new File(rootArtifactDir, pathString);
+        for (String pathString : METADATA_FILE_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File dataFile = new File(rootArtifactDir, pathString);
 
-             StmtIterator itr = model.listStatements(subject, sizeProperty, String.valueOf(dataFile.length()));
-             List<Statement> statementList = itr.toList();
-             Assert.assertEquals(1, statementList.size());
+            StmtIterator itr = model.listStatements(subject, sizeProperty, String.valueOf(dataFile.length()));
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
         }
     }
 
     @Test
     public void testType(){
         for (String pathString : COLLECTION_PATHS) {
-             Path path = Paths.get(pathString);
-             String file = path.getFileName().toString();
-             Resource subject = model.getResource(testUris.get(file));
-             File dataFile = new File(rootArtifactDir, pathString);
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
 
-             StmtIterator itr = model.listStatements(subject, typeProperty, "Collection");
-             List<Statement> statementList = itr.toList();
-             Assert.assertEquals(1, statementList.size());
+            StmtIterator itr = model.listStatements(subject, typeProperty, "Collection");
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
         }
 
-         for (String pathString : DATA_ITEM_PATHS) {
-             Path path = Paths.get(pathString);
-             String file = path.getFileName().toString();
-             Resource subject = model.getResource(testUris.get(file));
-             File dataFile = new File(rootArtifactDir, pathString);
+        for (String pathString : DATA_ITEM_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
 
-             StmtIterator itr = model.listStatements(subject, typeProperty, "DataItem");
-             List<Statement> statementList = itr.toList();
-             Assert.assertEquals(1, statementList.size());
+            StmtIterator itr = model.listStatements(subject, typeProperty, "DataItem");
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
         }
 
         for (String pathString : DATA_FILE_PATHS) {
-             Path path = Paths.get(pathString);
-             String file = path.getFileName().toString();
-             Resource subject = model.getResource(testUris.get(file));
-             File dataFile = new File(rootArtifactDir, pathString);
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
 
-             StmtIterator itr = model.listStatements(subject, typeProperty, "DataFile");
-             List<Statement> statementList = itr.toList();
-             Assert.assertEquals(1, statementList.size());
+            StmtIterator itr = model.listStatements(subject, typeProperty, "DataFile");
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
         }
 
         for (String pathString : METADATA_FILE_PATHS) {
-             Path path = Paths.get(pathString);
-             String file = path.getFileName().toString();
-             Resource subject = model.getResource(testUris.get(file));
-             File dataFile = new File(rootArtifactDir, pathString);
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
 
-             StmtIterator itr = model.listStatements(subject, typeProperty, "MetadataFile");
-             List<Statement> statementList = itr.toList();
-             Assert.assertEquals(1, statementList.size());
+            StmtIterator itr = model.listStatements(subject, typeProperty, "MetadataFile");
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
         }
     }
 
+    @Test
+    public void testModifiedTimes(){
+        for (String pathString : COLLECTION_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File thisFile = new File(rootArtifactDir, pathString);
 
-    //a few exploratory test methods, delete when this class is finished
-    @Ignore
+            String modifiedDate = DateUtility.toIso8601_DateTimeNoMillis(thisFile.lastModified());
+
+            StmtIterator itr = model.listStatements(subject, modifiedProperty, modifiedDate);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
+        }
+
+        for (String pathString : DATA_ITEM_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File thisFile = new File(rootArtifactDir, pathString);
+
+            String modifiedDate = DateUtility.toIso8601_DateTimeNoMillis(thisFile.lastModified());
+
+            StmtIterator itr = model.listStatements(subject, modifiedProperty, modifiedDate);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
+        }
+
+        for (String pathString : DATA_FILE_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File thisFile = new File(rootArtifactDir, pathString);
+
+            String modifiedDate = DateUtility.toIso8601_DateTimeNoMillis(thisFile.lastModified());
+
+            StmtIterator itr = model.listStatements(subject, modifiedProperty, modifiedDate);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
+        }
+
+        for (String pathString : METADATA_FILE_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File thisFile = new File(rootArtifactDir, pathString);
+
+            String modifiedDate = DateUtility.toIso8601_DateTimeNoMillis(thisFile.lastModified());
+
+            StmtIterator itr = model.listStatements(subject, modifiedProperty, modifiedDate);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
+       }
+
+    }
+
+    @Test
+    public void testCreatedTimes(){
+        for (String pathString : COLLECTION_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File thisFile = new File(rootArtifactDir, pathString);
+            BasicFileAttributes fileMetadata;
+            try {
+                fileMetadata =
+                        Files.getFileAttributeView(thisFile.toPath(),
+                                BasicFileAttributeView.class)
+                                .readAttributes();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            String createdDate = DateUtility.toIso8601_DateTimeNoMillis(new Date(fileMetadata.creationTime()
+                        .toMillis()));
+            StmtIterator itr = model.listStatements(subject, createdProperty, createdDate);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
+        }
+
+        for (String pathString : DATA_ITEM_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File thisFile = new File(rootArtifactDir, pathString);
+            BasicFileAttributes fileMetadata;
+            try {
+                fileMetadata =
+                        Files.getFileAttributeView(thisFile.toPath(),
+                                BasicFileAttributeView.class)
+                                .readAttributes();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            String createdDate = DateUtility.toIso8601_DateTimeNoMillis(new Date(fileMetadata.creationTime()
+                        .toMillis()));
+            StmtIterator itr = model.listStatements(subject, createdProperty, createdDate);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
+        }
+
+        for (String pathString : DATA_FILE_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File thisFile = new File(rootArtifactDir, pathString);
+            BasicFileAttributes fileMetadata;
+            try {
+                fileMetadata =
+                        Files.getFileAttributeView(thisFile.toPath(),
+                                BasicFileAttributeView.class)
+                                .readAttributes();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            String createdDate = DateUtility.toIso8601_DateTimeNoMillis(new Date(fileMetadata.creationTime()
+                    .toMillis()));
+            StmtIterator itr = model.listStatements(subject, createdProperty, createdDate);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
+        }
+
+        for (String pathString : METADATA_FILE_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File thisFile = new File(rootArtifactDir, pathString);
+            BasicFileAttributes fileMetadata;
+            try {
+                fileMetadata =
+                        Files.getFileAttributeView(thisFile.toPath(),
+                                BasicFileAttributeView.class)
+                                .readAttributes();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            String createdDate = DateUtility.toIso8601_DateTimeNoMillis(new Date(fileMetadata.creationTime()
+                        .toMillis()));
+            StmtIterator itr = model.listStatements(subject, createdProperty, createdDate);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(1, statementList.size());
+        }
+    }
+
+    @Test
+    public void testFormats(){
+
+        for (String pathString : DATA_FILE_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File thisFile = new File(rootArtifactDir, pathString);
+
+            List<DetectedFormat> fileFormats = ContentDetectionService.getInstance().detectFormats(thisFile);
+            List<Statement> detectedStatements = new ArrayList<>();
+
+            String formatString = "";
+
+            for (DetectedFormat format : fileFormats) {
+                if (format.getId() != null && !format.getId().isEmpty()) {
+                    formatString = "info:pronom/" + format.getId();
+                } else if (format.getMimeType() != null && !format.getMimeType().isEmpty()) {
+                    formatString = format.getMimeType();
+                }
+                StmtIterator itr = model.listStatements(subject, formatProperty, formatString);
+                List<Statement> statementList = itr.toList();
+                detectedStatements.addAll(statementList);
+            }
+
+            Assert.assertTrue(detectedStatements.size() > 0);
+        }
+
+        for (String pathString : METADATA_FILE_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            File thisFile = new File(rootArtifactDir, pathString);
+
+            List<DetectedFormat> fileFormats = ContentDetectionService.getInstance().detectFormats(thisFile);
+            List<Statement> detectedStatements = new ArrayList<>();
+
+            String formatString = "";
+
+            for (DetectedFormat format : fileFormats){
+                if (format.getId() != null && !format.getId().isEmpty()) {
+                    formatString = "info:pronom/" + format.getId();
+                } else if (format.getMimeType() != null && !format.getMimeType().isEmpty()) {
+                    formatString = format.getMimeType();
+                }
+                StmtIterator itr = model.listStatements(subject, formatProperty, formatString);
+                List<Statement> statementList = itr.toList();
+                detectedStatements.addAll(statementList);
+            }
+
+            Assert.assertTrue(detectedStatements.size() > 0);
+
+       }
+    }
+
+
+    //an exploratory test method, can delete when this class is finished
+
     @Test
     public void  spitOutModel() {
         model.write(System.out, "TURTLE");
-    }
-
-    @Ignore
-    @Test
-    public void spitOutProperties(){
-        StmtIterator sitr = model.listStatements();
-        while(sitr.hasNext()){
-            Statement s = sitr.nextStatement();
-            System.out.println(s.getPredicate().toString());
-        }
-    }
-
-    @Ignore
-    @Test
-    public void  listObjects() {
-
-        Property typeProperty = new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-        StmtIterator typeItr = model.listStatements(null, typeProperty, (RDFNode) null);
-        while(typeItr.hasNext()){
-            Statement s = typeItr.nextStatement();
-            System.out.println(s.toString());
-            System.out.println(s.getSubject().toString());
-            System.out.println(s.getString());
-            System.out.println();
-        }
-
-        StmtIterator memberItr = model.listStatements(null, memberProperty, (RDFNode) null);
-        while(memberItr.hasNext()){
-            Statement s = memberItr.nextStatement();
-            System.out.println(s.toString());
-            System.out.println(s.getSubject().toString());
-            System.out.println(s.getObject().toString());
-            System.out.println();
-        }
-
-
-        ResIterator ritr = model.listSubjects();
-        while(ritr.hasNext()){
-            Resource r = ritr.nextResource();
-            System.out.println(r.toString());
-            System.out.println();
-        }
-
-        ResIterator titr = model.listResourcesWithProperty(titleProperty);
-        while(titr.hasNext()){
-            Resource r = titr.nextResource();
-            System.out.println(r.toString());
-            System.out.println();
-        }
-
-        ResIterator tyItr = model.listResourcesWithProperty(typeProperty);
-        while(typeItr.hasNext()){
-            Resource r = tyItr.nextResource();
-            //System.out.println(r.toString());
-            NodeIterator nodeItr = model.listObjectsOfProperty(typeProperty);
-            while (nodeItr.hasNext()){
-                RDFNode n = nodeItr.nextNode();
-                System.out.println(n.toString());
-            }
-            System.out.println();
-        }
     }
 
 }

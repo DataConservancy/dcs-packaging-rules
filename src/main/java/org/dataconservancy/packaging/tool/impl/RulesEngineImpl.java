@@ -132,7 +132,7 @@ public class RulesEngineImpl implements RulesEngine {
         }
 
 
-        if (!cxt.isIgnored()) { //new
+        if (!cxt.isIgnored()) {
             try {
                 for (Rule rule : rules) {
                     if (rule.select(cxt)) {
@@ -156,7 +156,7 @@ public class RulesEngineImpl implements RulesEngine {
                         + e.getMessage(),
                         e);
             }
-        } //new
+        }
 
         if (cxt.getFile().isDirectory()) {
             for (File child : cxt.getFile().listFiles()) {

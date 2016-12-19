@@ -301,9 +301,7 @@ public class RulesEngineImplTest {
            StmtIterator itr = model.listStatements(null, titleProperty, file );
            List<Statement> statementList = itr.toList();
            Assert.assertEquals(2, statementList.size());
-
-
-           System.out.println(statementList.get(0).getSubject().getURI());
+            
            Resource resource0 = model.getResource(statementList.get(0).getSubject().getURI());
            Resource resource1 = model.getResource(statementList.get(1).getSubject().getURI());
 

@@ -72,12 +72,7 @@ public class RulesEngineImplTest {
     private static Property sizeProperty = new PropertyImpl(propertyUriBase + "hasSize");
     private static Property metadataProperty = new PropertyImpl(propertyUriBase + "isMetadataFor");
     private static Property typeProperty = new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-
-    /* Directories that should be projects */
-    //private static final List<String> ROOT_COLLECTION_PATHS = Arrays.asList("");
-    /* Directories that should be empty collections */
-    //private static final List<String> EMPTY_COLLECTION_PATHS = Arrays
-    //        .asList("empty_collection");
+    private static Property sourceProperty = new PropertyImpl("http://purl.org/dc/elements/1.1/source");
 
     /* Directories that should be collections */
     private static final List<String> COLLECTION_PATHS = Arrays
@@ -301,7 +296,7 @@ public class RulesEngineImplTest {
            StmtIterator itr = model.listStatements(null, titleProperty, file );
            List<Statement> statementList = itr.toList();
            Assert.assertEquals(2, statementList.size());
-            
+
            Resource resource0 = model.getResource(statementList.get(0).getSubject().getURI());
            Resource resource1 = model.getResource(statementList.get(1).getSubject().getURI());
 
@@ -625,6 +620,31 @@ public class RulesEngineImplTest {
             Assert.assertTrue(detectedStatements.size() > 0);
 
        }
+    }
+
+    @Test
+    public void testSource(){
+        List<String> allPaths = new ArrayList<>();
+        allPaths.addAll(COLLECTION_PATHS);
+        allPaths.addAll(DATA_ITEM_PATHS);
+        allPaths.addAll(DATA_FILE_PATHS);
+        allPaths.addAll(METADATA_FILE_PATHS);
+
+        for (String pathString : allPaths) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            StmtIterator itr = model.listStatements(subject, sourceProperty, (RDFNode) null);
+            List<Statement> statementList = itr.toList();
+
+            Assert.assertEquals(1, statementList.size());
+
+            System.out.println(statementList.get(0).getObject().toString());
+            System.out.println(pathString);
+            Assert.assertTrue(statementList.get(0).getObject().toString().contains(pathString));
+        }
+
     }
 
 }

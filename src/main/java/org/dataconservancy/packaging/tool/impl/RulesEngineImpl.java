@@ -23,6 +23,8 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;
 import com.hp.hpl.jena.rdf.model.impl.StatementImpl;
+import com.hp.hpl.jena.vocabulary.DC;
+import com.hp.hpl.jena.vocabulary.DC_11;
 import com.hp.hpl.jena.vocabulary.RDF;
 import org.dataconservancy.packaging.tool.api.RulesEngine;
 import org.dataconservancy.packaging.tool.api.RulesEngineException;
@@ -150,7 +152,6 @@ public class RulesEngineImpl implements RulesEngine {
             } catch (Exception e) {
                 throw new RulesEngineException("Error applying rules to pathname "
                         + cxt.getFile()
-
                         .toString()
                         + ": \n"
                         + e.getMessage(),
@@ -195,6 +196,9 @@ public class RulesEngineImpl implements RulesEngine {
             if (subjectResource == null) {
                 subjectResource = model.createResource(subjectResourceUriString);
             }
+
+            //record the relative file path string as a DC "source" property
+            subjectResource.addProperty(DC.source, relativeFilePathString);
 
             for (Map.Entry<String, List<String>> entry : mapping.getProperties().entrySet()) {
                 Set<String> valueSet = new HashSet<>(entry.getValue());

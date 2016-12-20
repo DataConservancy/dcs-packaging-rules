@@ -27,7 +27,7 @@ import java.io.File;
  * Created by jrm on 9/2/16.
  */
 public interface RulesEngine {
-    public Model generateRdf(File directoryTreeRoot) throws RulesEngineException;
+    Model generateRdf(File directoryTreeRoot) throws RulesEngineException;
 }
 
 

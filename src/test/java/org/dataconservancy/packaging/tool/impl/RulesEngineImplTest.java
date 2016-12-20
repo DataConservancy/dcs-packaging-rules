@@ -74,28 +74,30 @@ public class RulesEngineImplTest {
     private static Property typeProperty = new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
     private static Property sourceProperty = new PropertyImpl("http://purl.org/dc/elements/1.1/source");
 
+    private static String topDir = "content";
+
     /* Directories that should be collections */
     private static final List<String> COLLECTION_PATHS = Arrays
-            .asList("collection1",
-                    "collection2",
-                    "empty_collection",
-                    "hybrid_collection",
-                    "hybrid_collection/subcollection",
-                    "collection2/subcollection2.0",
-                    "collection2/subcollection2.1");
+            .asList("collection1/",
+                    "collection2/",
+                    "empty_collection/",
+                    "hybrid_collection/",
+                    "hybrid_collection/subcollection/",
+                    "collection2/subcollection2.0/",
+                    "collection2/subcollection2.1/");
 
     /* Directories that are collections, but also subcollections */
     private static final List<String> SUBCOLLECTION_PATHS = Arrays
-            .asList("collection2/subcollection2.0",
-                    "collection2/subcollection2.1",
-                    "hybrid_collection/subcollection");
+            .asList("collection2/subcollection2.0/",
+                    "collection2/subcollection2.1/",
+                    "hybrid_collection/subcollection/");
 
     /* Directories that should be DataItems */
     private static final List<String> DATA_ITEM_PATHS = Arrays
-            .asList("collection1/dataItem1.0",
-                    "collection1/dataItem1.1",
-                    "collection2/subcollection2.0/dataItem2.0.0",
-                    "collection2/subcollection2.1/dataItem2.1.0");
+            .asList("collection1/dataItem1.0/",
+                    "collection1/dataItem1.1/",
+                    "collection2/subcollection2.0/dataItem2.0.0/",
+                    "collection2/subcollection2.1/dataItem2.1.0/");
 
     /* Files that should be DataFiles */
     private static final List<String> DATA_FILE_PATHS = Arrays
@@ -148,7 +150,7 @@ public class RulesEngineImplTest {
         ZipFile zip = new ZipFile(zipFile);
         zip.extractAll(temp.getPath());
 
-        rootArtifactDir = new File(temp, "content");
+        rootArtifactDir = new File(temp, topDir);
         if (!rootArtifactDir.isDirectory()) {
             throw new RuntimeException();
         }
@@ -272,7 +274,7 @@ public class RulesEngineImplTest {
             String parent;
 
             if(childPath.getParent() == null){
-                parent = "content";
+                parent = topDir;
             } else {
                 parent = childPath.getParent().getFileName().toString();
             }
@@ -631,6 +633,7 @@ public class RulesEngineImplTest {
         allPaths.addAll(METADATA_FILE_PATHS);
 
         for (String pathString : allPaths) {
+            pathString = topDir + File.separatorChar + pathString; //this will harmonize with the source values in the model
             pathString = pathString.replace('/', File.separatorChar);
             Path path = Paths.get(pathString);
             String file = path.getFileName().toString();
@@ -640,9 +643,7 @@ public class RulesEngineImplTest {
 
             Assert.assertEquals(1, statementList.size());
 
-            System.out.println(statementList.get(0).getObject().toString());
-            System.out.println(pathString);
-            Assert.assertTrue(statementList.get(0).getObject().toString().contains(pathString));
+            Assert.assertEquals(pathString,statementList.get(0).getObject().toString());
         }
 
     }

@@ -54,7 +54,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Test Class for RulesEngineImpl
+ * Test Class for RulesEngineImpl. We generate a jena model from a zip file in test resources, and then
+ * test the model to make sure it contains the expected triples
  */
 public class RulesEngineImplTest {
 
@@ -173,7 +174,7 @@ public class RulesEngineImplTest {
         // populate the map from filenames to URIs for the test model
         // we need to map the URIs because they are generated on the fly by the RulesEngine
         StmtIterator titleItr = model.listStatements(null, titleProperty, (RDFNode) null);
-        while(titleItr.hasNext()){
+        while (titleItr.hasNext()) {
             Statement s = titleItr.nextStatement();
             testUris.put(s.getString(), s.getSubject().toString());
         }
@@ -181,7 +182,7 @@ public class RulesEngineImplTest {
     }
 
     @Test
-    public void testExistence(){
+    public void testExistence() {
          for (String pathString : COLLECTION_PATHS) {
              pathString = pathString.replace('/', File.separatorChar);
              Path childPath = Paths.get(pathString);
@@ -212,7 +213,7 @@ public class RulesEngineImplTest {
     }
 
     @Test
-    public void testNonExistence(){
+    public void testNonExistence() {
         for (String pathString : DOT_PATHS) {
             pathString = pathString.replace('/', File.separatorChar);
             Path path = Paths.get(pathString);
@@ -222,7 +223,7 @@ public class RulesEngineImplTest {
     }
 
     @Test
-    public void testMembership(){
+    public void testMembership() {
         for (String pathString : SUBCOLLECTION_PATHS) {
              pathString = pathString.replace('/', File.separatorChar);
              Path childPath = Paths.get(pathString);
@@ -289,7 +290,7 @@ public class RulesEngineImplTest {
     }
 
     @Test
-    public void testHybrids(){
+    public void testHybrids() {
         for (String pathString : HYBRID_PATHS) {
            pathString = pathString.replace('/', File.separatorChar);
            Path path = Paths.get(pathString);
@@ -417,7 +418,7 @@ public class RulesEngineImplTest {
     }
 
     @Test
-    public void testModifiedTimes(){
+    public void testModifiedTimes() {
         for (String pathString : COLLECTION_PATHS) {
             pathString = pathString.replace('/', File.separatorChar);
             Path path = Paths.get(pathString);
@@ -477,7 +478,7 @@ public class RulesEngineImplTest {
     }
 
     @Test
-    public void testCreatedTimes(){
+    public void testCreatedTimes() {
         for (String pathString : COLLECTION_PATHS) {
             pathString = pathString.replace('/', File.separatorChar);
             Path path = Paths.get(pathString);
@@ -568,7 +569,7 @@ public class RulesEngineImplTest {
     }
 
     @Test
-    public void testFormats(){
+    public void testFormats() {
 
         for (String pathString : DATA_FILE_PATHS) {
             pathString = pathString.replace('/', File.separatorChar);
@@ -625,7 +626,7 @@ public class RulesEngineImplTest {
     }
 
     @Test
-    public void testSource(){
+    public void testSource() {
         List<String> allPaths = new ArrayList<>();
         allPaths.addAll(COLLECTION_PATHS);
         allPaths.addAll(DATA_ITEM_PATHS);
@@ -643,7 +644,7 @@ public class RulesEngineImplTest {
 
             Assert.assertEquals(1, statementList.size());
 
-            Assert.assertEquals(pathString,statementList.get(0).getObject().toString());
+            Assert.assertEquals(pathString, statementList.get(0).getObject().toString());
         }
 
     }

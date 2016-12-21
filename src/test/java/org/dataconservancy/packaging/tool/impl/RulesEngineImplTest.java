@@ -134,7 +134,7 @@ public class RulesEngineImplTest {
     public static TemporaryFolder tmpfolder = new TemporaryFolder();
 
     /**
-     *  Set up the model generated from the provided sip file, and create a map for the uris
+     *  Set up the model generated from the provided zip file, and create a map for the package URIs
      * @throws IOException if the zip file temp zip file can't be created
      * @throws ZipException if the zip file can't be created
      * @throws RulesEngineException if the model can't be created

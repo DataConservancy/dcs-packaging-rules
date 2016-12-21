@@ -24,11 +24,13 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;
 import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.IOUtils;
 import org.dataconservancy.dcs.model.DetectedFormat;
 import org.dataconservancy.dcs.util.ContentDetectionService;
 import org.dataconservancy.dcs.util.DateUtility;
 import org.dataconservancy.packaging.tool.api.RulesEngine;
+import org.dataconservancy.packaging.tool.api.RulesEngineException;
 import org.dataconservancy.packaging.tool.model.PackageDescriptionRulesBuilder;
 import org.dataconservancy.packaging.tool.model.builder.xstream.JaxbPackageDescriptionRulesBuilder;
 import org.junit.Assert;
@@ -38,7 +40,9 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -130,8 +134,14 @@ public class RulesEngineImplTest {
     @ClassRule
     public static TemporaryFolder tmpfolder = new TemporaryFolder();
 
+    /**
+     *  Set up the model generated from the provided sip file, and create a map for the uris
+     * @throws IOException if the zip file temp zip file can't be created
+     * @throws ZipException if the zip file can't be created
+     * @throws RulesEngineException if the model can't be created
+     */
     @BeforeClass
-    public static void setUp() throws Exception {
+    public static void setUp() throws IOException, ZipException, RulesEngineException {
         InputStream zipInputStream =
                 org.dataconservancy.packaging.tool.impl.RulesEngineImplTest.class
                         .getClassLoader()
@@ -181,6 +191,9 @@ public class RulesEngineImplTest {
 
     }
 
+    /**
+     * Test to show that all the paths in the content directory give rise to resources in the model
+     */
     @Test
     public void testExistence() {
          for (String pathString : COLLECTION_PATHS) {
@@ -212,6 +225,9 @@ public class RulesEngineImplTest {
          }
     }
 
+    /**
+     * Test to shoiw that paths in the content directory which should be ignored, are ignored
+     */
     @Test
     public void testNonExistence() {
         for (String pathString : DOT_PATHS) {
@@ -222,6 +238,9 @@ public class RulesEngineImplTest {
         }
     }
 
+    /**
+     * Test membership relationships
+     */
     @Test
     public void testMembership() {
         for (String pathString : SUBCOLLECTION_PATHS) {
@@ -266,6 +285,9 @@ public class RulesEngineImplTest {
     }
 
 
+    /**
+     * Test metadata file relationships
+     */
     @Test
     public void testMetadataness() {
         for (String pathString : METADATA_FILE_PATHS) {
@@ -289,6 +311,9 @@ public class RulesEngineImplTest {
         }
     }
 
+    /**
+     * Test that appropriate files are converted to DataItem / DataFile pairs
+     */
     @Test
     public void testHybrids() {
         for (String pathString : HYBRID_PATHS) {
@@ -343,6 +368,9 @@ public class RulesEngineImplTest {
         }
     }
 
+    /**
+     * Test the size property
+     */
     @Test
     public void testFileSizes(){
         for (String pathString : DATA_FILE_PATHS) {
@@ -370,6 +398,9 @@ public class RulesEngineImplTest {
         }
     }
 
+    /**
+     * Test the type property
+     */
     @Test
     public void testType(){
         for (String pathString : COLLECTION_PATHS) {
@@ -417,6 +448,9 @@ public class RulesEngineImplTest {
         }
     }
 
+    /**
+     * Test file modified proeprty
+     */
     @Test
     public void testModifiedTimes() {
         for (String pathString : COLLECTION_PATHS) {
@@ -477,6 +511,9 @@ public class RulesEngineImplTest {
 
     }
 
+    /**
+     * Test created time property
+     */
     @Test
     public void testCreatedTimes() {
         for (String pathString : COLLECTION_PATHS) {
@@ -568,6 +605,9 @@ public class RulesEngineImplTest {
         }
     }
 
+    /**
+     * Test format property
+     */
     @Test
     public void testFormats() {
 
@@ -625,6 +665,9 @@ public class RulesEngineImplTest {
        }
     }
 
+    /**
+     * Test the DC source property
+     */
     @Test
     public void testSource() {
         List<String> allPaths = new ArrayList<>();

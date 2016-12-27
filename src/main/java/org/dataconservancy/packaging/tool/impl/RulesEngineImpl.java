@@ -183,7 +183,7 @@ public class RulesEngineImpl implements RulesEngine {
             String relativeFilePathString = relativeFileUri.toString();
             String absoluteFilePathString = cxt.getFile().getAbsolutePath();
 
-            if (mappings.size() > 1) {
+            if (mappings.size() > 1 && mapping.getSpecifier() != null) {
                 relativeFilePathString = relativeFilePathString + "#" + mapping.getSpecifier();
                 absoluteFilePathString = absoluteFilePathString + "#" + mapping.getSpecifier();
             }

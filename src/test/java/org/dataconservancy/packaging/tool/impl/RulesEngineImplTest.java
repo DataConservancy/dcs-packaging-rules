@@ -690,10 +690,5 @@ public class RulesEngineImplTest {
         }
 
     }
-
-    @Test
-    public void testSpitOutModel(){
-        model.write(System.out, "TURTLE");
-    }
-
+    
 }

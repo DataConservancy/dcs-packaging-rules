@@ -79,7 +79,6 @@ public class RulesEngineImplTest {
     private static Property sourceProperty = new PropertyImpl("http://purl.org/dc/elements/1.1/source");
 
     private static String topDir = "content";
-    private static File temp;
 
     /* Directories that should be collections */
     private static final List<String> COLLECTION_PATHS = Arrays
@@ -146,7 +145,7 @@ public class RulesEngineImplTest {
                 org.dataconservancy.packaging.tool.impl.RulesEngineImplTest.class
                         .getClassLoader()
                         .getResourceAsStream("RulesEngineTest.zip");
-        temp = tmpfolder.newFolder("RulesEngineTest");
+        File temp = tmpfolder.newFolder("RulesEngineTest");
 
         File zipFile =
                 tmpfolder.newFile("RulesEngineTest.zip");
@@ -676,7 +675,7 @@ public class RulesEngineImplTest {
         allPaths.addAll(METADATA_FILE_PATHS);
 
         for (String pathString : allPaths) {
-            pathString = temp.getAbsolutePath()+ File.separatorChar + topDir + File.separatorChar + pathString; //this will harmonize with the source values in the model
+            pathString = rootArtifactDir.getAbsolutePath() + File.separatorChar + pathString; 
             pathString = pathString.replace('/', File.separatorChar);
             Path path = Paths.get(pathString);
             String file = path.getFileName().toString();
@@ -690,5 +689,5 @@ public class RulesEngineImplTest {
         }
 
     }
-    
+
 }

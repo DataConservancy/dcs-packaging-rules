@@ -79,29 +79,30 @@ public class RulesEngineImplTest {
     private static Property sourceProperty = new PropertyImpl("http://purl.org/dc/elements/1.1/source");
 
     private static String topDir = "content";
+    private static File temp;
 
     /* Directories that should be collections */
     private static final List<String> COLLECTION_PATHS = Arrays
-            .asList("collection1/",
-                    "collection2/",
-                    "empty_collection/",
-                    "hybrid_collection/",
-                    "hybrid_collection/subcollection/",
-                    "collection2/subcollection2.0/",
-                    "collection2/subcollection2.1/");
+            .asList("collection1",
+                    "collection2",
+                    "empty_collection",
+                    "hybrid_collection",
+                    "hybrid_collection/subcollection",
+                    "collection2/subcollection2.0",
+                    "collection2/subcollection2.1");
 
     /* Directories that are collections, but also subcollections */
     private static final List<String> SUBCOLLECTION_PATHS = Arrays
-            .asList("collection2/subcollection2.0/",
-                    "collection2/subcollection2.1/",
-                    "hybrid_collection/subcollection/");
+            .asList("collection2/subcollection2.0",
+                    "collection2/subcollection2.1",
+                    "hybrid_collection/subcollection");
 
     /* Directories that should be DataItems */
     private static final List<String> DATA_ITEM_PATHS = Arrays
-            .asList("collection1/dataItem1.0/",
-                    "collection1/dataItem1.1/",
-                    "collection2/subcollection2.0/dataItem2.0.0/",
-                    "collection2/subcollection2.1/dataItem2.1.0/");
+            .asList("collection1/dataItem1.0",
+                    "collection1/dataItem1.1",
+                    "collection2/subcollection2.0/dataItem2.0.0",
+                    "collection2/subcollection2.1/dataItem2.1.0");
 
     /* Files that should be DataFiles */
     private static final List<String> DATA_FILE_PATHS = Arrays
@@ -145,8 +146,7 @@ public class RulesEngineImplTest {
                 org.dataconservancy.packaging.tool.impl.RulesEngineImplTest.class
                         .getClassLoader()
                         .getResourceAsStream("RulesEngineTest.zip");
-        File temp =
-                tmpfolder.newFolder("RulesEngineTest");
+        temp = tmpfolder.newFolder("RulesEngineTest");
 
         File zipFile =
                 tmpfolder.newFile("RulesEngineTest.zip");
@@ -676,7 +676,7 @@ public class RulesEngineImplTest {
         allPaths.addAll(METADATA_FILE_PATHS);
 
         for (String pathString : allPaths) {
-            pathString = topDir + File.separatorChar + pathString; //this will harmonize with the source values in the model
+            pathString = temp.getAbsolutePath()+ File.separatorChar + topDir + File.separatorChar + pathString; //this will harmonize with the source values in the model
             pathString = pathString.replace('/', File.separatorChar);
             Path path = Paths.get(pathString);
             String file = path.getFileName().toString();
@@ -689,6 +689,11 @@ public class RulesEngineImplTest {
             Assert.assertEquals(pathString, statementList.get(0).getObject().toString());
         }
 
+    }
+
+    @Test
+    public void testSpitOutModel(){
+        model.write(System.out, "TURTLE");
     }
 
 }

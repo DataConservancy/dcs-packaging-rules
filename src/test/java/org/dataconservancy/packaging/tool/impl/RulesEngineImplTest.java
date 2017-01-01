@@ -668,13 +668,11 @@ public class RulesEngineImplTest {
      */
     @Test
     public void testSource() {
-        List<String> allPaths = new ArrayList<>();
-        allPaths.addAll(COLLECTION_PATHS);
-        allPaths.addAll(DATA_ITEM_PATHS);
-        allPaths.addAll(DATA_FILE_PATHS);
-        allPaths.addAll(METADATA_FILE_PATHS);
+        List<String> filePaths = new ArrayList<>();
+        filePaths.addAll(DATA_FILE_PATHS);
+        filePaths.addAll(METADATA_FILE_PATHS);
 
-        for (String pathString : allPaths) {
+        for (String pathString : filePaths) {
             pathString = rootArtifactDir.getAbsolutePath() + File.separatorChar + pathString; 
             pathString = pathString.replace('/', File.separatorChar);
             Path path = Paths.get(pathString);

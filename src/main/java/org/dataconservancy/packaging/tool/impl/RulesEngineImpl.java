@@ -198,8 +198,10 @@ public class RulesEngineImpl implements RulesEngine {
                 subjectResource = model.createResource(subjectResourceUriString);
             }
 
-            //record the absolute file path string as a DC "source" property
-            subjectResource.addProperty(DC.source, absoluteFilePathString);
+            //if it's a file, record the absolute file path string as a DC "source" property
+            if (cxt.getFile().isFile()) {
+                subjectResource.addProperty(DC.source, absoluteFilePathString);
+            }
 
             for (Map.Entry<String, List<String>> entry : mapping.getProperties().entrySet()) {
                 Set<String> valueSet = new HashSet<>(entry.getValue());

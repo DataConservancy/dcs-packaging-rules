@@ -22,7 +22,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;
+import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.IOUtils;
@@ -181,6 +181,8 @@ public class RulesEngineImplTest {
 
         // populate the map from filenames to URIs for the test model
         // we need to map the URIs because they are generated on the fly by the RulesEngine
+        // Because hybrid data files and data items have the same title value, we can't use this map to
+        // sort them. hybrid test methods look a little different.
         StmtIterator titleItr = model.listStatements(null, titleProperty, (RDFNode) null);
         while (titleItr.hasNext()) {
             Statement s = titleItr.nextStatement();
@@ -664,7 +666,7 @@ public class RulesEngineImplTest {
     }
 
     /**
-     * Test the DC source property
+     * Test that the DC source property is correct for byteStreams
      */
     @Test
     public void testSource() {
@@ -680,12 +682,83 @@ public class RulesEngineImplTest {
             Resource subject = model.getResource(testUris.get(file));
             StmtIterator itr = model.listStatements(subject, sourceProperty, (RDFNode) null);
             List<Statement> statementList = itr.toList();
-
             Assert.assertEquals(1, statementList.size());
 
             Assert.assertEquals(pathString, statementList.get(0).getObject().toString());
         }
 
+    }
+
+    /**
+     * Test that the DC source property is correct for non-byteStreams
+     */
+    @Test
+    public void testNoSource() {
+        List<String> filePaths = new ArrayList<>();
+        filePaths.addAll(COLLECTION_PATHS);
+        filePaths.addAll(DATA_ITEM_PATHS);
+
+        for (String pathString : filePaths) {
+            pathString = rootArtifactDir.getAbsolutePath() + File.separatorChar + pathString;
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            Resource subject = model.getResource(testUris.get(file));
+            StmtIterator itr = model.listStatements(subject, sourceProperty, (RDFNode) null);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(0, statementList.size());
+        }
+
+    }
+
+    /**
+     * Test that hybrids have the correct DC source property
+     */
+    @Test
+    public void testHybridSource() {
+        for (String pathString : HYBRID_PATHS) {
+            pathString = pathString.replace('/', File.separatorChar);
+            Path path = Paths.get(pathString);
+            String file = path.getFileName().toString();
+            //both the DataItem and the DataFile will have title equal to the file name
+            StmtIterator itr = model.listStatements(null, titleProperty, file);
+            List<Statement> statementList = itr.toList();
+            Assert.assertEquals(2, statementList.size());
+
+            Resource resource0 = model.getResource(statementList.get(0).getSubject().getURI());
+            Resource resource1 = model.getResource(statementList.get(1).getSubject().getURI());
+
+            Assert.assertNotNull(resource0);
+            Assert.assertNotNull(resource1);
+
+            StmtIterator itr0 = model.listStatements(resource0, memberProperty, resource1);
+            StmtIterator itr1 = model.listStatements(resource1, memberProperty, resource0);
+            List<Statement> statementList0 = itr0.toList();
+            List<Statement> statementList1 = itr1.toList();
+
+            //one of these has to be the container of the other
+            Assert.assertTrue((statementList0.size() == 0 && statementList1.size() == 1)
+                    || (statementList0.size() == 1 && statementList1.size() == 0));
+
+            //Sort out which one is the DataItem, and which is the DataFile
+            Resource dataItemResource;
+            Resource dataFileResource;
+            if (statementList0.size() == 0 && statementList1.size() == 1) {
+                dataItemResource = resource0;
+                dataFileResource = resource1;
+            } else {
+                dataItemResource = resource1;
+                dataFileResource = resource0;
+            }
+
+            //only data files and metadata files get the source property here
+            Assert.assertFalse(dataItemResource.hasProperty(sourceProperty));
+            Assert.assertTrue(dataFileResource.hasProperty(sourceProperty));
+
+            pathString = rootArtifactDir.getAbsolutePath() + File.separatorChar + pathString;
+
+            Assert.assertEquals(pathString, dataFileResource.getProperty(sourceProperty).getObject().toString());
+        }
     }
 
 }

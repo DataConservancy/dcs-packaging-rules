@@ -216,7 +216,7 @@
 		</select>
 		<mappings>
 			<mapping>
-				<type>DataFile</type>
+				<type byteStream="true">DataFile</type>
 				<properties>
 					<property name="http://dataconservancy.org/business-object-model#hasCreateDate">
 						<value type="FileMetadata" specifier="createDate" />
@@ -337,7 +337,7 @@
 		</select>
 		<mappings>
 			<mapping>
-				<type>MetadataFile</type>
+				<type byteStream="true">MetadataFile</type>
 				<properties>
 					<property name="http://dataconservancy.org/business-object-model#hasCreateDate">
 						<value type="FileMetadata" specifier="createDate" />

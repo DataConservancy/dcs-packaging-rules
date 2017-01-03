@@ -86,10 +86,11 @@ public class RulesEngineImpl implements RulesEngine {
         }
 
        /*
-        * make sure we have a clear file Set before we
+        * make sure we have a clear file Set and uri map before we
         * start
         */
         visitedFiles.clear();
+        entityUris.clear();
 
         /*
          * Create resources for each filesystem entity and add Statements to the Statement list
@@ -199,7 +200,8 @@ public class RulesEngineImpl implements RulesEngine {
             }
 
             //if it's a file, record the absolute file path string as a DC "source" property
-            if (cxt.getFile().isFile()) {
+            //byte streams must be flagged as such in the rules file type element in the mappings
+            if (mapping.getType().isByteStream() != null && mapping.getType().isByteStream()) {
                 subjectResource.addProperty(DC.source, absoluteFilePathString);
             }
 

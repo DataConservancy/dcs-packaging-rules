@@ -26,6 +26,8 @@
 
 
     <properties>
+        <!-- Configure file encoding for plugins -->
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Version of DROID content detection in use -->
         <dcs.project.droid.version>6.1.5</dcs.project.droid.version>
         <!-- Version of XStream in use -->
@@ -95,6 +97,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>1.7.21</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <version>1.7.21</version>
         </dependency>
 

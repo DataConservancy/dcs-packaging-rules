@@ -70,7 +70,7 @@ public class RulesEngineImpl implements RulesEngine {
 
     private Model model = ModelFactory.createDefaultModel();
 
-    RulesEngineImpl(RulesSpec rulesSpec) {
+    public RulesEngineImpl(RulesSpec rulesSpec) {
         rules.addAll(rulesSpec.getRule().stream().map(RuleImpl::new).collect(Collectors.toList()));
     }
 

@@ -15,7 +15,7 @@
  */
 package org.dataconservancy.packaging.shared;
 
-import com.hp.hpl.jena.rdf.model.*;
+import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

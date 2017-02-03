@@ -16,7 +16,7 @@
 
 package org.dataconservancy.packaging.tool.api;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 
 import java.io.File;
 

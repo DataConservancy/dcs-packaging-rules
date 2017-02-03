@@ -16,15 +16,15 @@
 
 package org.dataconservancy.packaging.tool.impl;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;
-import com.hp.hpl.jena.rdf.model.impl.StatementImpl;
-import com.hp.hpl.jena.vocabulary.DC;
-import com.hp.hpl.jena.vocabulary.RDF;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.impl.PropertyImpl;
+import org.apache.jena.rdf.model.impl.StatementImpl;
+import org.apache.jena.vocabulary.DC;
+import org.apache.jena.vocabulary.RDF;
 import org.dataconservancy.packaging.tool.api.RulesEngine;
 import org.dataconservancy.packaging.tool.api.RulesEngineException;
 import org.dataconservancy.packaging.tool.impl.rules.FileContext;

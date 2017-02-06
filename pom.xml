@@ -74,7 +74,7 @@
                         </sources>
                         <!--<schemaDirectory>${basedir}/src/main/resources</schemaDirectory>-->
                         <!--<schemaFiles>rules.xsd</schemaFiles>-->
-
+                        <extension>true</extension>
                     </configuration>
                 </plugin>
 
@@ -110,6 +110,12 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 
@@ -265,6 +271,16 @@
             <groupId>com.googlecode.foresite-toolkit</groupId>
             <artifactId>foresite</artifactId>
             <version>0.9</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -299,6 +315,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <version>3.2.3.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 

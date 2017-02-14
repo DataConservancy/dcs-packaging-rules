@@ -251,8 +251,7 @@ public class RulesEngineImpl implements RulesEngine {
                 //create a new URI, but make sure it doesn't collide with ones we already have (not likely)
                 URI candidateURI;
                 while (entityUris.containsKey(candidateURI = new URI("urn::" + UUID.randomUUID().toString())));
-                entityUris.put(key, new URI("urn::" + candidateURI.toString()));
-
+                entityUris.put(key, candidateURI);
             } catch (URISyntaxException e) {
                 throw new RulesEngineException("Error creating URI for " + key, e);
             }
